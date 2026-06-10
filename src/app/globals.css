@@ -1,0 +1,103 @@
+@import "tailwindcss";
+
+/* ============================================================
+   ARGOS — design system "Mission Control"
+   Dark-first. Un solo acento eléctrico (cian). Mono para datos.
+   ============================================================ */
+
+:root {
+  --bg: #06080d;
+  --surface: #0c111a;
+  --surface-2: #121927;
+  --line: #1d2738;
+  --fg: #e8eef6;
+  --muted: #8b97ab;
+  --accent: #22d3ee;
+  --accent-strong: #67e8f9;
+  --success: #34d399;
+  --warn: #fbbf24;
+  --danger: #f87171;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface2: var(--surface-2);
+  --color-line: var(--line);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-success: var(--success);
+  --color-warn: var(--warn);
+  --color-danger: var(--danger);
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  -webkit-tap-highlight-color: transparent;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+}
+*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar-thumb { background: var(--line); border-radius: 8px; }
+*::-webkit-scrollbar-track { background: transparent; }
+
+/* Superficie "vidrio" */
+.glass {
+  background: color-mix(in srgb, var(--surface) 82%, transparent);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--line);
+}
+
+/* Glow del acento para elementos vivos */
+.glow-accent {
+  box-shadow: 0 0 24px -6px color-mix(in srgb, var(--accent) 55%, transparent);
+}
+
+/* Números/datos siempre en mono */
+.numeric {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Fondo del login y headers: gradiente + grilla técnica */
+.argos-bg {
+  position: relative;
+  background:
+    radial-gradient(ellipse 80% 60% at 70% -10%, color-mix(in srgb, var(--accent) 14%, transparent), transparent),
+    radial-gradient(ellipse 60% 50% at 10% 110%, color-mix(in srgb, var(--accent) 8%, transparent), transparent),
+    var(--bg);
+}
+.argos-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 44px 44px;
+  opacity: 0.22;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 30%, black, transparent);
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+.pulse-dot { animation: pulse-dot 2.2s ease-in-out infinite; }
