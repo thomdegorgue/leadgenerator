@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
@@ -61,8 +62,13 @@ function Clock() {
 /** Menú hamburguesa mobile: acceso a TODAS las secciones. */
 function MobileMenu({ isAdmin, fullName, roleLabel }: { isAdmin: boolean; fullName: string; roleLabel: string }) {
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
   const items = navFor(isAdmin);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
@@ -70,6 +76,65 @@ function MobileMenu({ isAdmin, fullName, roleLabel }: { isAdmin: boolean; fullNa
       document.body.style.overflow = "";
     };
   }, [open]);
+
+  const drawer = (
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-[60] bg-black/70 backdrop-blur-sm"
+          onClick={() => setOpen(false)}
+        >
+          <motion.div
+            initial={{ x: "-100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "-100%" }}
+            transition={{ type: "spring", damping: 30, stiffness: 350 }}
+            onClick={(e) => e.stopPropagation()}
+            className="flex h-full w-72 max-w-[85vw] flex-col border-r border-line bg-surface2"
+          >
+            <div className="flex h-11 items-center justify-between border-b border-line px-4">
+              <Logo />
+              <button
+                onClick={() => setOpen(false)}
+                className="rounded-[6px] p-1.5 text-muted hover:text-fg"
+                aria-label="Cerrar menú"
+              >
+                <X className="size-5" />
+              </button>
+            </div>
+            <nav className="flex-1 space-y-1 overflow-y-auto p-2">
+              {items.map(({ href, label, icon: Icon }) => {
+                const active = isActive(pathname, href);
+                return (
+                  <Link
+                    key={href}
+                    href={href}
+                    onClick={() => setOpen(false)}
+                    className={cn(
+                      "flex items-center gap-3 rounded-[7px] px-3 py-3 transition-colors",
+                      active
+                        ? "border border-accent/25 bg-accent/[0.08] text-accent"
+                        : "border border-transparent text-muted"
+                    )}
+                  >
+                    <Icon className="size-5" />
+                    <span className="text-xs font-semibold uppercase tracking-[0.14em]">{label}</span>
+                  </Link>
+                );
+              })}
+            </nav>
+            <div className="border-t border-line px-4 py-3">
+              <p className="text-sm font-medium">{fullName}</p>
+              <p className="microlabel mt-0.5">{roleLabel}</p>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
 
   return (
     <div className="md:hidden">
@@ -80,62 +145,7 @@ function MobileMenu({ isAdmin, fullName, roleLabel }: { isAdmin: boolean; fullNa
       >
         <Menu className="size-5" />
       </button>
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[60] bg-black/70 backdrop-blur-sm"
-            onClick={() => setOpen(false)}
-          >
-            <motion.div
-              initial={{ x: "-100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "-100%" }}
-              transition={{ type: "spring", damping: 30, stiffness: 350 }}
-              onClick={(e) => e.stopPropagation()}
-              className="flex h-full w-72 max-w-[85vw] flex-col border-r border-line bg-surface2"
-            >
-              <div className="flex h-11 items-center justify-between border-b border-line px-4">
-                <Logo />
-                <button
-                  onClick={() => setOpen(false)}
-                  className="rounded-[6px] p-1.5 text-muted hover:text-fg"
-                  aria-label="Cerrar menú"
-                >
-                  <X className="size-5" />
-                </button>
-              </div>
-              <nav className="flex-1 space-y-1 overflow-y-auto p-2">
-                {items.map(({ href, label, icon: Icon }) => {
-                  const active = isActive(pathname, href);
-                  return (
-                    <Link
-                      key={href}
-                      href={href}
-                      onClick={() => setOpen(false)}
-                      className={cn(
-                        "flex items-center gap-3 rounded-[7px] px-3 py-3 transition-colors",
-                        active
-                          ? "border border-accent/25 bg-accent/[0.08] text-accent"
-                          : "border border-transparent text-muted"
-                      )}
-                    >
-                      <Icon className="size-5" />
-                      <span className="text-xs font-semibold uppercase tracking-[0.14em]">{label}</span>
-                    </Link>
-                  );
-                })}
-              </nav>
-              <div className="border-t border-line px-4 py-3">
-                <p className="text-sm font-medium">{fullName}</p>
-                <p className="microlabel mt-0.5">{roleLabel}</p>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {mounted && createPortal(drawer, document.body)}
     </div>
   );
 }
