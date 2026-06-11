@@ -1,12 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { fetchDatasetItems, mapGmapsItem } from "@/lib/apify";
-import { normalizePhoneAR } from "@/lib/phone";
-import { rootDomain } from "@/lib/domain";
+import { importApifyDataset } from "@/lib/apify-import";
 
 export const maxDuration = 300;
-
-const CHUNK = 1000;
 
 export async function POST(request: NextRequest) {
   const runId = request.nextUrl.searchParams.get("run");
@@ -18,6 +14,7 @@ export async function POST(request: NextRequest) {
   const { data: run } = await admin.from("search_runs").select("*").eq("id", runId).single();
   if (!run || run.stats?.webhook_token !== token)
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  if (run.status !== "corriendo") return NextResponse.json({ ok: true, skipped: true });
 
   const body = (await request.json()) as {
     eventType?: string;
@@ -40,34 +37,8 @@ export async function POST(request: NextRequest) {
   if (!datasetId) return NextResponse.json({ error: "no dataset" }, { status: 400 });
 
   try {
-    const items = await fetchDatasetItems(datasetId);
-    const rows = items
-      .map(mapGmapsItem)
-      .filter((r) => r.name)
-      .map((r) => ({
-        ...r,
-        phone_e164: normalizePhoneAR(r.phone),
-        domain: rootDomain(r.website),
-      }));
-
-    for (let i = 0; i < rows.length; i += CHUNK) {
-      const { error } = await admin.rpc("import_leads", {
-        p_org: run.org_id,
-        p_run: runId,
-        p_source: "gmaps",
-        p_rows: rows.slice(i, i + CHUNK),
-      });
-      if (error) throw new Error(error.message);
-    }
-
-    if (rows.length === 0) {
-      await admin
-        .from("search_runs")
-        .update({ status: "completado", finished_at: new Date().toISOString() })
-        .eq("id", runId);
-    }
-
-    return NextResponse.json({ ok: true, imported: rows.length });
+    const imported = await importApifyDataset(admin, runId, run.org_id, datasetId);
+    return NextResponse.json({ ok: true, imported });
   } catch (e) {
     await admin
       .from("search_runs")

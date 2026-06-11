@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { Radar, FileSpreadsheet } from "lucide-react";
 import { getCtx } from "@/lib/auth";
 import { apifyEnabled } from "@/lib/flags";
+import { syncRunningApifyRuns } from "@/lib/apify-import";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty";
@@ -31,6 +32,10 @@ const RUN_LABELS: Record<RunStatus, string> = {
 export default async function BasesPage() {
   const ctx = await getCtx();
   if (!ctx.isAdmin) redirect("/");
+
+  // Levanta resultados de corridas Apify en progreso (camino principal en local,
+  // red de seguridad del webhook en producción).
+  if (apifyEnabled()) await syncRunningApifyRuns(ctx.org.id);
 
   const { data } = await ctx.supabase
     .from("searches")

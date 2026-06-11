@@ -49,12 +49,19 @@ export async function startGmapsSearch(input: {
     .single();
   if (runError) return { ok: false, error: runError.message };
 
+  // Apify exige URLs públicas para webhooks. En local (localhost) no se
+  // registra webhook: la página de Bases hace polling y completa la corrida.
+  const base = appUrl();
+  const webhookUrl = base.startsWith("https://")
+    ? `${base}/api/apify/webhook?run=${run.id}&token=${webhookToken}`
+    : undefined;
+
   try {
     const apifyRunId = await startGmapsRun({
       niche: input.niche.trim(),
       location: input.location.trim(),
       count,
-      webhookUrl: `${appUrl()}/api/apify/webhook?run=${run.id}&token=${webhookToken}`,
+      webhookUrl,
     });
     await ctx.supabase.from("search_runs").update({ apify_run_id: apifyRunId }).eq("id", run.id);
   } catch (e) {
