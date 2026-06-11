@@ -84,6 +84,37 @@ export async function updateMember(
 
 export type DistributionMode = "round_robin" | "por_carga" | "por_score";
 
+/** Saca a un miembro de la org: sus leads activos vuelven al pool sin asignar. */
+export async function removeMember(membershipId: string): Promise<ActionResult> {
+  const ctx = await getCtx();
+  if (!canManageMembers(ctx)) return { ok: false, error: "Solo el owner saca miembros." };
+
+  const admin = createAdminClient();
+  const { data: membership } = await admin
+    .from("memberships")
+    .select("user_id, org_id")
+    .eq("id", membershipId)
+    .single();
+  if (!membership || membership.org_id !== ctx.org.id)
+    return { ok: false, error: "Miembro no encontrado." };
+  if (membership.user_id === ctx.userId)
+    return { ok: false, error: "No podés sacarte a vos mismo." };
+
+  await admin
+    .from("leads")
+    .update({ assigned_to: null, assigned_at: null })
+    .eq("org_id", ctx.org.id)
+    .eq("assigned_to", membership.user_id)
+    .not("status", "in", "(cliente,descartado)");
+
+  const { error } = await admin.from("memberships").delete().eq("id", membershipId);
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath("/equipo");
+  revalidatePath("/leads");
+  return { ok: true };
+}
+
 /**
  * Distribución automática de leads sin asignar entre los vendedores.
  * - round_robin: parejo, en orden de llegada

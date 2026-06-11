@@ -8,7 +8,8 @@ import type { CanonicalLeadRow, ImportStats } from "@/lib/types";
 
 /** Crea la búsqueda + corrida para una importación CSV y devuelve el run id. */
 export async function createCsvRun(
-  name: string
+  name: string,
+  productId?: string | null
 ): Promise<{ ok: true; runId: string } | { ok: false; error: string }> {
   const ctx = await getCtx();
   if (!ctx.isAdmin) return { ok: false, error: "Solo managers y owners importan bases." };
@@ -20,6 +21,7 @@ export async function createCsvRun(
       created_by: ctx.userId,
       name: name.trim() || "Importación CSV",
       sources: ["csv"],
+      product_id: productId || null,
     })
     .select("id")
     .single();

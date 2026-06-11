@@ -569,7 +569,7 @@ begin
   select * into v_enr from public.lead_enrichments where lead_id = p_lead;
 
   for v_prod in
-    select id, score_rules from public.products
+    select id, score_rules, category_keywords from public.products
     where org_id = v_lead.org_id and active
   loop
     v_score := 0;
@@ -587,6 +587,15 @@ begin
         when 'no_website'         then v_lead.website is null
         when 'ig_5k_followers'    then coalesce(v_enr.ig_followers, 0) >= 5000
         when 'good_rating'        then coalesce(v_lead.rating, 0) >= 4.0
+        -- el rubro del lead matchea alguna keyword del producto
+        when 'category_match'     then coalesce(array_length(v_prod.category_keywords, 1), 0) > 0
+          and exists (
+            select 1 from unnest(v_prod.category_keywords) kw
+            where coalesce(v_lead.category, '') ilike '%' || kw || '%'
+               or v_lead.name ilike '%' || kw || '%'
+          )
+        -- usa una plataforma de ecommerce detectada (Tienda Nube, Shopify...)
+        when 'uses_platform'      then coalesce(v_enr.signals->>'platform', '') <> ''
         else false
       end;
       if v_signal then
@@ -603,6 +612,25 @@ begin
                   generated_by = 'rules', created_at = now()
     where public.lead_scores.generated_by = 'rules';  -- no pisa scores de IA
   end loop;
+end $$;
+
+
+-- Recalcula los scores por reglas de TODA la organización (al cambiar reglas
+-- o crear un producto). Los scores generados por IA no se pisan.
+create or replace function public.recompute_org_scores(p_org uuid)
+returns integer language plpgsql security definer set search_path = public as $$
+declare
+  v_count int := 0;
+  r record;
+begin
+  if not (public.is_org_admin(p_org) or coalesce(auth.jwt()->>'role', '') = 'service_role') then
+    raise exception 'No autorizado';
+  end if;
+  for r in select id from public.leads where org_id = p_org loop
+    perform public.compute_rule_scores(r.id);
+    v_count := v_count + 1;
+  end loop;
+  return v_count;
 end $$;
 
 
@@ -688,3 +716,20 @@ alter table public.leads add column if not exists ai_scored_at timestamptz;
 
 create index if not exists leads_pending_enrich_idx
   on public.leads (org_id, created_at) where enriched_at is null;
+
+-- [2026-06] Fase 3: bases gestionables, productos autoservicio, cierre con datos
+alter table public.searches add column if not exists product_id uuid references public.products(id) on delete set null;
+alter table public.searches add column if not exists notes text;
+alter table public.searches add column if not exists archived boolean not null default false;
+alter table public.searches add column if not exists auto_rerun boolean not null default false;
+
+alter table public.products add column if not exists pitch text;
+alter table public.products add column if not exists price_from text;
+alter table public.products add column if not exists category_keywords text[] not null default '{}';
+
+alter table public.leads add column if not exists discard_reason text;
+alter table public.leads add column if not exists deal_value numeric;
+alter table public.leads add column if not exists deal_product_id uuid references public.products(id) on delete set null;
+
+alter table public.campaigns add column if not exists team_id uuid references public.teams(id) on delete set null;
+alter table public.campaigns add column if not exists filters jsonb not null default '{}'::jsonb;

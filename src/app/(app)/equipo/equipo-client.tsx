@@ -2,12 +2,20 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Shuffle, UserPlus, Users, Copy, Check } from "lucide-react";
+import { Shuffle, UserPlus, Users, Copy, Check, X } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
 import { Input, Label, Select } from "@/components/ui/field";
-import { createTeam, distributeLeads, inviteUser, type DistributionMode } from "@/server/team";
+import {
+  createTeam,
+  distributeLeads,
+  inviteUser,
+  removeMember,
+  updateMember,
+  type DistributionMode,
+} from "@/server/team";
+import { initials } from "@/lib/utils";
 import type { Role, Team } from "@/lib/types";
 
 export function InviteButton({ teams }: { teams: Team[] }) {
@@ -120,6 +128,107 @@ export function InviteButton({ teams }: { teams: Team[] }) {
         )}
       </Modal>
     </>
+  );
+}
+
+export interface MemberStats {
+  id: string;
+  userId: string;
+  role: Role;
+  teamId: string | null;
+  name: string;
+  activeLeads: number;
+  contacts7d: number;
+  responded: number;
+  clients: number;
+}
+
+export function MemberRow({
+  member,
+  teams,
+  isOwner,
+}: {
+  member: MemberStats;
+  teams: Team[];
+  isOwner: boolean;
+}) {
+  const router = useRouter();
+  const [busy, setBusy] = useState(false);
+
+  async function change(fields: { role?: Role; teamId?: string | null }) {
+    setBusy(true);
+    await updateMember(member.id, fields);
+    setBusy(false);
+    router.refresh();
+  }
+
+  const miniSelect =
+    "h-8 rounded-md border border-line bg-surface px-2 text-xs focus:border-accent/60 focus:outline-none disabled:opacity-50";
+
+  return (
+    <tr className="bg-surface/50">
+      <td className="px-4 py-3">
+        <div className="flex items-center gap-2.5">
+          <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-surface2 text-[10px] font-semibold text-accent">
+            {initials(member.name)}
+          </span>
+          <span className="truncate text-sm font-medium">{member.name}</span>
+        </div>
+      </td>
+      <td className="numeric px-3 py-3 text-right">{member.activeLeads}</td>
+      <td className="numeric px-3 py-3 text-right">{member.contacts7d}</td>
+      <td className="numeric px-3 py-3 text-right text-violet-300">{member.responded}</td>
+      <td className="numeric px-3 py-3 text-right text-success">{member.clients}</td>
+      <td className="px-3 py-3">
+        {isOwner ? (
+          <div className="flex items-center gap-1.5">
+            <select
+              value={member.role}
+              disabled={busy}
+              onChange={(e) => change({ role: e.target.value as Role })}
+              className={miniSelect}
+            >
+              <option value="vendedor">Vendedor</option>
+              <option value="manager">Manager</option>
+              <option value="owner">Owner</option>
+            </select>
+            <select
+              value={member.teamId ?? ""}
+              disabled={busy}
+              onChange={(e) => change({ teamId: e.target.value || null })}
+              className={miniSelect}
+            >
+              <option value="">Sin equipo</option>
+              {teams.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.name}
+                </option>
+              ))}
+            </select>
+            <button
+              disabled={busy}
+              onClick={async () => {
+                if (confirm(`¿Sacar a ${member.name}? Sus leads activos vuelven al pool.`)) {
+                  setBusy(true);
+                  await removeMember(member.id);
+                  setBusy(false);
+                  router.refresh();
+                }
+              }}
+              className="rounded-md p-1.5 text-muted hover:text-danger"
+              title="Sacar del equipo"
+            >
+              <X className="size-3.5" />
+            </button>
+          </div>
+        ) : (
+          <span className="text-xs text-muted">
+            {member.role}
+            {member.teamId && ` · ${teams.find((t) => t.id === member.teamId)?.name ?? ""}`}
+          </span>
+        )}
+      </td>
+    </tr>
   );
 }
 

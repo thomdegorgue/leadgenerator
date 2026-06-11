@@ -1,5 +1,6 @@
 import { getCtx } from "@/lib/auth";
 import { Sidebar, BottomNav, MobileTopbar } from "@/components/shell/shell";
+import { CommandPalette } from "@/components/command-palette";
 
 const ROLE_LABELS: Record<string, string> = {
   owner: "Owner",
@@ -20,6 +21,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         <div className="mx-auto max-w-6xl">{children}</div>
       </main>
       <BottomNav isAdmin={ctx.isAdmin} />
+      <CommandPalette isAdmin={ctx.isAdmin} />
     </div>
   );
 }

@@ -1,0 +1,14 @@
+{
+  "name": "ARGOS — Sistema Operativo Comercial",
+  "short_name": "ARGOS",
+  "description": "El que todo lo ve. Leads, score multi-producto y WhatsApp para el equipo de ventas.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#06080d",
+  "theme_color": "#06080d",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

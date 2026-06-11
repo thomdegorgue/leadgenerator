@@ -197,7 +197,11 @@ export async function aiScoreBatch(): Promise<BatchResult> {
       .is("ai_scored_at", null)
       .order("created_at", { ascending: true })
       .limit(AI_BATCH),
-    admin.from("products").select("id, slug, name, description").eq("org_id", ctx.org.id).eq("active", true),
+    admin
+      .from("products")
+      .select("id, slug, name, description, pitch, price_from")
+      .eq("org_id", ctx.org.id)
+      .eq("active", true),
   ]);
 
   if (!leads?.length) return { ok: true, processed: 0, remaining: 0 };
@@ -207,6 +211,8 @@ export async function aiScoreBatch(): Promise<BatchResult> {
     slug: p.slug,
     name: p.name,
     description: p.description,
+    pitch: p.pitch,
+    price_from: p.price_from,
   }));
   const bySlug = new Map(products.map((p) => [p.slug, p.id]));
 
@@ -268,7 +274,7 @@ export async function generateAnalysis(
   const [{ data: products }, { data: topScore }] = await Promise.all([
     admin
       .from("products")
-      .select("slug, name, description")
+      .select("slug, name, description, pitch, price_from")
       .eq("org_id", ctx.org.id)
       .eq("active", true),
     admin

@@ -9,7 +9,7 @@ export default async function PipelinePage() {
 
   const { data } = await ctx.supabase
     .from("leads")
-    .select("id, name, city, status, assignee:profiles!leads_assigned_to_fkey(full_name)")
+    .select("id, name, city, status, lead_scores(score), assignee:profiles!leads_assigned_to_fkey(full_name)")
     .order("updated_at", { ascending: false })
     .limit(500);
 
@@ -18,6 +18,7 @@ export default async function PipelinePage() {
     name: l.name as string,
     city: l.city as string | null,
     status: l.status as BoardLead["status"],
+    score: Math.max(0, ...((l.lead_scores as { score: number }[] | null) ?? []).map((s) => s.score)) || null,
     assignee:
       (l.assignee as unknown as { full_name: string | null } | null)?.full_name ?? null,
   }));

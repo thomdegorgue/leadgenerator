@@ -69,4 +69,32 @@ export const REASON_LABELS: Record<string, string> = {
   no_website: "No tiene web",
   ig_5k_followers: "+5.000 seguidores en IG",
   good_rating: "Buen rating en Google",
+  category_match: "Rubro ideal",
+  uses_platform: "Usa plataforma de ecommerce",
+};
+
+/** Señales disponibles para el editor visual de reglas de score. */
+export const SIGNAL_OPTIONS: { key: string; label: string; hint: string }[] = [
+  { key: "category_match", label: "Rubro ideal", hint: "El rubro del negocio matchea las keywords del producto" },
+  { key: "no_ecommerce", label: "No tiene ecommerce", hint: "No se detectó tienda online en su web" },
+  { key: "no_catalog", label: "No tiene catálogo", hint: "No se detectó catálogo online" },
+  { key: "no_online_booking", label: "No tiene reservas online", hint: "Sin sistema de turnos detectado" },
+  { key: "no_website", label: "No tiene web", hint: "El negocio no tiene sitio propio" },
+  { key: "has_website", label: "Tiene web", hint: "Tiene sitio propio" },
+  { key: "uses_whatsapp", label: "Usa WhatsApp", hint: "Tiene teléfono móvil o botón de WhatsApp" },
+  { key: "has_instagram", label: "Tiene Instagram", hint: "Tiene perfil de IG detectado" },
+  { key: "ig_5k_followers", label: "+5.000 seguidores", hint: "Audiencia relevante en Instagram" },
+  { key: "sells_products", label: "Vende productos", hint: "Publica o vende productos online" },
+  { key: "good_rating", label: "Buen rating en Google", hint: "4.0 o más estrellas" },
+  { key: "uses_platform", label: "Usa plataforma ecommerce", hint: "Tienda Nube, Shopify, Woo... (para venderle otro producto)" },
+];
+
+/** Motivos tipificados de descarte. */
+export const DISCARD_REASONS: Record<string, string> = {
+  no_contesta: "No contesta",
+  no_interesa: "No le interesa",
+  numero_invalido: "Número inválido",
+  ya_resuelto: "Ya lo tiene resuelto",
+  competencia: "Se fue con la competencia",
+  otro: "Otro",
 };

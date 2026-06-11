@@ -79,7 +79,7 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
     .maybeSingle();
   if (!lead) notFound();
 
-  const [{ data: scores }, { data: activities }, { data: templates }, members, { data: aiOutput }] = await Promise.all([
+  const [{ data: scores }, { data: activities }, { data: templates }, members, { data: aiOutput }, { data: products }] = await Promise.all([
     ctx.supabase
       .from("lead_scores")
       .select("*, products(name)")
@@ -120,8 +120,10 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
           .limit(1)
           .maybeSingle()
       : Promise.resolve({ data: null }),
+    ctx.supabase.from("products").select("id, name").eq("active", true).order("name"),
   ]);
 
+  const productOptions = (products ?? []) as { id: string; name: string }[];
   const typedLead = lead as Lead & { assignee: { full_name: string | null } | null };
 
   let analysis: AiAnalysis | null = null;
@@ -288,6 +290,8 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
             assignedTo={typedLead.assigned_to}
             isAdmin={ctx.isAdmin}
             members={members}
+            products={productOptions}
+            hasDeal={typedLead.deal_value != null || typedLead.deal_product_id != null}
           />
 
           <Link href="/leads" className="block text-center text-sm text-muted hover:text-accent">

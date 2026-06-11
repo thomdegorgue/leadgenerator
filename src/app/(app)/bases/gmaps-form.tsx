@@ -5,10 +5,10 @@ import { useRouter } from "next/navigation";
 import { Radar } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input, Label } from "@/components/ui/field";
+import { Input, Label, Select } from "@/components/ui/field";
 import { startGmapsSearch } from "@/server/bases";
 
-export function GmapsForm() {
+export function GmapsForm({ products }: { products: { id: string; name: string }[] }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -24,6 +24,8 @@ export function GmapsForm() {
       niche: String(fd.get("niche") ?? ""),
       location: String(fd.get("location") ?? ""),
       count: parseInt(String(fd.get("count") ?? "100"), 10),
+      productId: String(fd.get("product") ?? "") || null,
+      autoRerun: fd.get("autoRerun") === "on",
     });
 
     setLoading(false);
@@ -62,6 +64,21 @@ export function GmapsForm() {
             <Input id="name" name="name" placeholder="Distribuidoras AMBA" />
           </div>
         </div>
+        <div>
+          <Label htmlFor="product">Producto objetivo (opcional)</Label>
+          <Select id="product" name="product" defaultValue="">
+            <option value="">Multi-producto (todos)</option>
+            {products.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name}
+              </option>
+            ))}
+          </Select>
+        </div>
+        <label className="flex items-center gap-2 text-xs text-muted">
+          <input type="checkbox" name="autoRerun" className="size-4 accent-[var(--accent)]" />
+          Re-ejecutar cada semana (la base crece sola, sin duplicados)
+        </label>
         {error && <p className="text-xs text-danger">{error}</p>}
         <Button type="submit" loading={loading} className="w-full">
           Generar base

@@ -46,6 +46,10 @@ export interface Product {
   slug: string;
   name: string;
   description: string | null;
+  pitch: string | null;
+  price_from: string | null;
+  category_keywords: string[];
+  score_rules: Record<string, number>;
   active: boolean;
 }
 
@@ -76,6 +80,9 @@ export interface Lead {
   assigned_to: string | null;
   assigned_at: string | null;
   next_followup_at: string | null;
+  discard_reason: string | null;
+  deal_value: number | null;
+  deal_product_id: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -118,6 +125,10 @@ export interface Search {
   niche: string | null;
   location: string | null;
   target_count: number;
+  product_id: string | null;
+  notes: string | null;
+  archived: boolean;
+  auto_rerun: boolean;
   created_at: string;
 }
 

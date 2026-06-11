@@ -9,6 +9,9 @@ export const metadata: Metadata = {
   title: { default: "ARGOS", template: "%s · ARGOS" },
   description: "Sistema Operativo Comercial — el que todo lo ve.",
   applicationName: "ARGOS",
+  manifest: "/manifest.json",
+  icons: { icon: "/icon-192.png", apple: "/icon-192.png" },
+  appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "ARGOS" },
 };
 
 export const viewport: Viewport = {

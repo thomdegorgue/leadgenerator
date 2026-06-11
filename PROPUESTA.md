@@ -143,6 +143,84 @@ ai_outputs (speech, análisis comercial — cacheados por lead)
 - **Fase 3 — Escala y experiencia (~2 semanas):** campañas, Modo Focus, Siguiente Mejor Acción, reciclaje, dashboard ejecutivo, PWA + push.
 - **Fase 4 — Opcional:** WhatsApp Business API (tracking real de respuestas, secuencias), multi-tenant comercial para venderlo como SaaS, integraciones.
 
+## 8b. Fase 3 ampliada — "Siguiente nivel" (definida tras validar Fases 1-2 en producción)
+
+Diagnóstico de la v1: la operación manual está coja (no hay asignación masiva ni por equipo),
+los productos y sus reglas de score están hardcodeados en SQL (cada SaaS nuevo requiere tocar
+la base), y falta la capa de gestión para managers. Fase 3 ataca eso en 4 bloques:
+
+### Bloque A — Operación de leads pro
+- Selección múltiple en la lista + acciones masivas: asignar a vendedor, asignar a EQUIPO
+  (reparte entre sus vendedores), cambiar estado, agregar a campaña, descartar.
+- Filtros avanzados: por score mínimo de un producto, fuente, ciudad, sin asignar,
+  con/sin teléfono/web/IG, por base de origen. Combinables y compartibles por URL.
+- Asignación inline desde la lista (sin entrar al detalle).
+- Distribución dirigida: repartir el resultado de un filtro a un equipo/vendedor específico
+  (no solo el pool global), con los 3 modos existentes.
+- Edición completa de leads (corregir teléfono mal normalizado, web, IG, etc.).
+- Badge "mejor oportunidad" (producto top + score) en lista y pipeline.
+- Motivos de descarte tipificados (no contesta / no interesa / número inválido / ya resuelto /
+  competencia) → alimenta analytics de pérdida.
+
+### Bloque A2 — Bases como entidad gestionable
+- Detalle de base (/bases/[id]): SOLO sus leads, con stats propias (total, contactados,
+  tasa de respuesta, clientes) — cada base se vuelve medible como mini-campaña.
+- Editar base (nombre, notas), archivar, borrar (opción: conservar o eliminar los leads
+  nunca contactados).
+- **Asignar base completa a un equipo o vendedor** (reparte con los 3 modos, scoped a la base).
+- **Producto objetivo opcional al crear la base**: la búsqueda guarda `product_id`; el score,
+  el orden por defecto, la distribución por score y el análisis IA se especializan en ese
+  producto. Sin selección → comportamiento multi-producto actual.
+- Re-ejecutar búsqueda (misma receta, dedup automático: solo entran negocios nuevos) +
+  re-ejecución programada (cron semanal opcional) → la base crece sola.
+
+### Bloque B — Productos autoservicio + score configurable
+- Página /productos: CRUD de cada SaaS/servicio (nombre, descripción para la IA, pitch,
+  precio desde). Alta de producto nuevo = entra solo a reglas, scores e IA.
+- Editor visual de reglas de score: señales disponibles con puntaje ajustable, SIN tocar SQL.
+- Señal nueva "rubro coincide" con keywords configurables por producto (ej: agenda →
+  peluquería, barbería, consultorio, estética) — mata la genericidad actual.
+- Señal "usa plataforma X" (Tienda Nube/Shopify detectado por el enriquecedor).
+- Botón "Recalcular toda la base" al cambiar reglas (batch sobre todos los leads).
+
+### Bloque C — Equipos, campañas y dashboard
+- Gestión real de miembros: cambiar rol/equipo desde la UI, desactivar miembro con
+  reasignación de sus leads.
+- Vista manager: comparativa de vendedores (contactos/día, tasa de respuesta, reuniones,
+  cierres), leads estancados (>7 días sin actividad) con reasignación rápida.
+- Campañas: producto + filtro (score mínimo, zona, rubro) + equipo asignado + plantillas
+  propias; métricas por campaña.
+- Dashboard ejecutivo: funnel, evolución semanal, tasa de respuesta POR PLANTILLA,
+  rendimiento por fuente y por campaña, valor de cierre (`deal_value` al marcar cliente).
+- Reciclaje automático (Vercel Cron diario): sin respuesta tras N días → cola de recontacto;
+  estancados → alerta al manager. Configurable por org.
+
+### Bloque D — Modo Focus + experiencia
+- **Modo Focus** (mobile, pantalla principal del vendedor): card-stack full-screen con la
+  cola priorizada por el sistema (vencidos → respondieron sin contestar → nuevos top score).
+  Cada card: negocio, score, razones IA, speech listo; botones grandes WhatsApp + resultado
+  1 tap; al registrar pasa sola a la siguiente. Contador de sesión y meta diaria
+  ("23/30 contactos hoy"), micro-animaciones y haptics. Procesar 50 leads en 20 minutos.
+- Command palette (⌘K) en desktop: buscar leads, saltar a módulos.
+- PWA instalable (manifest + service worker); push notifications quedan para 3.5.
+- Realtime en pipeline (Supabase Realtime ya habilitado en schema).
+
+### Pulido transversal (escala "cientos de ventas/mes")
+- **Cierre con datos**: al marcar "cliente" se registra producto vendido + valor mensual →
+  el dashboard muestra facturación real generada, no solo conteos.
+- **Agenda del día** del vendedor: la cola Focus prioriza vencidos y respuestas sin contestar.
+- **Rescate de teléfonos**: el enriquecedor web ya lee el HTML — extraer el número del botón
+  wa.me del sitio cuando GMaps no lo trae (recupera leads "muertos" sin teléfono).
+- **Export CSV** de cualquier filtro (backups, audiencias de ads).
+- **Configuración de organización** (/ajustes): días de reciclaje, meta diaria de contactos.
+- **Métricas por plantilla**: tasa de respuesta de cada mensaje → se nota qué speech vende.
+
+Postergado a pedido del usuario: notificaciones in-app ("respondió" no es detectable sin la
+Business API) y SLA de primer contacto (vendedores a comisión, sin urgencia de medición).
+Queda para más adelante: merge de duplicados blandos.
+
+Orden de construcción: A+A2 → B → C → D + pulido transversal distribuido en cada bloque.
+
 ## 9. Costos — plan base (escalable)
 
 Principio: **todo funciona sin IA y sin servicios pagos extra**; cada servicio se enchufa cuando hace falta (la app detecta la env var y habilita las features).

@@ -26,7 +26,7 @@ const CHUNK = 400;
 
 type Step = "pick" | "map" | "importing" | "done";
 
-export function CsvImport() {
+export function CsvImport({ products }: { products: { id: string; name: string }[] }) {
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
   const [step, setStep] = useState<Step>("pick");
@@ -37,6 +37,7 @@ export function CsvImport() {
   const [progress, setProgress] = useState(0);
   const [stats, setStats] = useState<ImportStats | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [productId, setProductId] = useState("");
 
   function onFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -96,7 +97,7 @@ export function CsvImport() {
       })
       .filter((r) => r.name);
 
-    const created = await createCsvRun(fileName.replace(/\.csv$/i, ""));
+    const created = await createCsvRun(fileName.replace(/\.csv$/i, ""), productId || null);
     if (!created.ok) {
       setError(created.error);
       setStep("map");
@@ -182,6 +183,17 @@ export function CsvImport() {
                 </Select>
               </div>
             ))}
+          </div>
+          <div>
+            <Label>Producto objetivo (opcional)</Label>
+            <Select value={productId} onChange={(e) => setProductId(e.target.value)}>
+              <option value="">Multi-producto (todos)</option>
+              {products.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
+            </Select>
           </div>
           <div className="flex gap-2">
             <Button onClick={runImport} className="flex-1">

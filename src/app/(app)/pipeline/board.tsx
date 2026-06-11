@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 import {
   DndContext,
   DragOverlay,
@@ -24,6 +25,7 @@ export interface BoardLead {
   name: string;
   city: string | null;
   status: LeadStatus;
+  score: number | null;
   assignee: string | null;
 }
 
@@ -38,14 +40,30 @@ function LeadCard({ lead, overlay = false }: { lead: BoardLead; overlay?: boolea
       <p className="truncate text-sm font-medium">{lead.name}</p>
       <div className="mt-1.5 flex items-center justify-between gap-2">
         <p className="truncate text-xs text-muted">{lead.city ?? "—"}</p>
-        {lead.assignee && (
-          <span
-            className="flex size-5 shrink-0 items-center justify-center rounded-full bg-surface text-[9px] font-semibold text-accent"
-            title={lead.assignee}
-          >
-            {initials(lead.assignee)}
-          </span>
-        )}
+        <span className="flex shrink-0 items-center gap-1.5">
+          {lead.score != null && (
+            <span
+              className={cn(
+                "numeric rounded-full px-1.5 py-0.5 text-[9px] font-semibold",
+                lead.score >= 75
+                  ? "bg-success/15 text-success"
+                  : lead.score >= 45
+                    ? "bg-warn/15 text-warn"
+                    : "bg-surface text-muted"
+              )}
+            >
+              {lead.score}
+            </span>
+          )}
+          {lead.assignee && (
+            <span
+              className="flex size-5 items-center justify-center rounded-full bg-surface text-[9px] font-semibold text-accent"
+              title={lead.assignee}
+            >
+              {initials(lead.assignee)}
+            </span>
+          )}
+        </span>
       </div>
     </div>
   );
@@ -106,6 +124,26 @@ export function Board({ initialLeads }: { initialLeads: BoardLead[] }) {
   const router = useRouter();
   const [leads, setLeads] = useState(initialLeads);
   const [activeId, setActiveId] = useState<string | null>(null);
+  const refreshTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // El tablero se actualiza solo cuando otro usuario mueve leads (Realtime)
+  useEffect(() => {
+    setLeads(initialLeads);
+  }, [initialLeads]);
+
+  useEffect(() => {
+    const supabase = createClient();
+    const channel = supabase
+      .channel("pipeline-leads")
+      .on("postgres_changes", { event: "*", schema: "public", table: "leads" }, () => {
+        if (refreshTimer.current) clearTimeout(refreshTimer.current);
+        refreshTimer.current = setTimeout(() => router.refresh(), 1200);
+      })
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [router]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),

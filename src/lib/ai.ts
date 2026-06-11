@@ -44,6 +44,8 @@ export interface ProductInfo {
   slug: string;
   name: string;
   description: string | null;
+  pitch?: string | null;
+  price_from?: string | null;
 }
 
 export interface AiScore {

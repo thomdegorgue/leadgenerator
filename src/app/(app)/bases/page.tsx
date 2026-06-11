@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Radar, FileSpreadsheet } from "lucide-react";
 import { getCtx } from "@/lib/auth";
@@ -46,10 +47,11 @@ export default async function BasesPage() {
   const baseQuery = () =>
     ctx.supabase.from("leads").select("id", { count: "exact", head: true });
 
-  const [{ data }, webPending, igPending, aiPending] = await Promise.all([
+  const [{ data }, webPending, igPending, aiPending, { data: products }] = await Promise.all([
     ctx.supabase
       .from("searches")
-      .select("*, search_runs(*)")
+      .select("*, search_runs(*), products(name)")
+      .eq("archived", false)
       .order("created_at", { ascending: false })
       .limit(20),
     countLeads((q) => q.is("enriched_at", null)),
@@ -59,9 +61,15 @@ export default async function BasesPage() {
     aiEnabled()
       ? countLeads((q) => q.not("enriched_at", "is", null).is("ai_scored_at", null))
       : Promise.resolve({ count: 0 }),
+    ctx.supabase.from("products").select("id, name").eq("active", true).order("name"),
   ]);
 
-  const searches = (data ?? []) as (Search & { search_runs: SearchRun[] })[];
+  const productOptions = (products ?? []) as { id: string; name: string }[];
+
+  const searches = (data ?? []) as unknown as (Search & {
+    search_runs: SearchRun[];
+    products: { name: string } | null;
+  })[];
   const hasRunning = searches.some((s) =>
     s.search_runs.some((r) => r.status === "corriendo" || r.status === "pendiente")
   );
@@ -78,7 +86,7 @@ export default async function BasesPage() {
 
       <section className="grid gap-4 lg:grid-cols-2">
         {apifyEnabled() ? (
-          <GmapsForm />
+          <GmapsForm products={productOptions} />
         ) : (
           <Card className="border-dashed">
             <div className="flex items-center gap-2">
@@ -91,7 +99,7 @@ export default async function BasesPage() {
             </p>
           </Card>
         )}
-        <CsvImport />
+        <CsvImport products={productOptions} />
       </section>
 
       <section>
@@ -120,13 +128,18 @@ export default async function BasesPage() {
                 b.created_at.localeCompare(a.created_at)
               )[0];
               return (
-                <Card key={search.id} className="flex flex-wrap items-center gap-3 py-3">
-                  <div className="min-w-0 flex-1">
+                <Card key={search.id} className="flex flex-wrap items-center gap-3 py-3 transition-colors hover:border-accent/40">
+                  <Link href={`/bases/${search.id}`} className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium">{search.name}</p>
                     <p className="text-xs text-muted">
-                      {search.sources.join(", ")} · {timeAgo(search.created_at)}
+                      {search.sources.join(", ")}
+                      {search.products?.name && (
+                        <span className="text-accent"> · 🎯 {search.products.name}</span>
+                      )}
+                      {" · "}
+                      {timeAgo(search.created_at)}
                     </p>
-                  </div>
+                  </Link>
                   {run && (
                     <>
                       {run.status === "completado" && (
