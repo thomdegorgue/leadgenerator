@@ -183,8 +183,8 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
         </div>
       </header>
 
-      <div className="grid gap-5 lg:grid-cols-3">
-        <div className="space-y-5 lg:col-span-2">
+      <div className="grid min-w-0 gap-5 lg:grid-cols-3">
+        <div className="min-w-0 space-y-5 lg:col-span-2">
           {aiEnabled() && (
             <AiPanel
               leadId={typedLead.id}
@@ -230,7 +230,7 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
           </section>
         </div>
 
-        <div className="space-y-5">
+        <div className="min-w-0 space-y-5">
           {(scores?.length ?? 0) > 0 && (
             <section>
               <h2 className="microlabel mb-3 text-fg">Oportunidad por producto</h2>

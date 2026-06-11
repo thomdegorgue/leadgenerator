@@ -27,7 +27,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="min-h-dvh">
-      <StatusBar fullName={fullName} todayCount={todayCount ?? 0} dailyGoal={dailyGoal} />
+      <StatusBar
+        fullName={fullName}
+        roleLabel={`${roleLabel} · ${ctx.org.name}`}
+        isAdmin={ctx.isAdmin}
+        todayCount={todayCount ?? 0}
+        dailyGoal={dailyGoal}
+      />
       <Sidebar isAdmin={ctx.isAdmin} roleLabel={`${roleLabel} · ${ctx.org.name}`} />
       <main className="px-4 pb-28 pt-16 sm:px-6 md:ml-48 md:pb-10 md:pt-[4.5rem]">
         <div className="mx-auto max-w-7xl">{children}</div>

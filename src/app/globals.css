@@ -51,6 +51,7 @@ body {
   background: var(--bg);
   color: var(--fg);
   -webkit-tap-highlight-color: transparent;
+  overflow-x: clip;
 }
 
 ::selection {

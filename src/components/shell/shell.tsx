@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LogOut } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { LogOut, Menu, X } from "lucide-react";
 import { navFor } from "./nav";
 import { SegmentGauge } from "@/components/ui/segment-gauge";
 import { cn, initials } from "@/lib/utils";
@@ -57,19 +58,106 @@ function Clock() {
   return <span className="numeric text-[11px] text-muted">{time ?? "--:--:--"}</span>;
 }
 
+/** Menú hamburguesa mobile: acceso a TODAS las secciones. */
+function MobileMenu({ isAdmin, fullName, roleLabel }: { isAdmin: boolean; fullName: string; roleLabel: string }) {
+  const [open, setOpen] = useState(false);
+  const pathname = usePathname();
+  const items = navFor(isAdmin);
+
+  useEffect(() => {
+    document.body.style.overflow = open ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open]);
+
+  return (
+    <div className="md:hidden">
+      <button
+        onClick={() => setOpen(true)}
+        className="rounded-[6px] p-1.5 text-muted hover:bg-surface2 hover:text-fg"
+        aria-label="Abrir menú"
+      >
+        <Menu className="size-5" />
+      </button>
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[60] bg-black/70 backdrop-blur-sm"
+            onClick={() => setOpen(false)}
+          >
+            <motion.div
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
+              transition={{ type: "spring", damping: 30, stiffness: 350 }}
+              onClick={(e) => e.stopPropagation()}
+              className="flex h-full w-72 max-w-[85vw] flex-col border-r border-line bg-surface2"
+            >
+              <div className="flex h-11 items-center justify-between border-b border-line px-4">
+                <Logo />
+                <button
+                  onClick={() => setOpen(false)}
+                  className="rounded-[6px] p-1.5 text-muted hover:text-fg"
+                  aria-label="Cerrar menú"
+                >
+                  <X className="size-5" />
+                </button>
+              </div>
+              <nav className="flex-1 space-y-1 overflow-y-auto p-2">
+                {items.map(({ href, label, icon: Icon }) => {
+                  const active = isActive(pathname, href);
+                  return (
+                    <Link
+                      key={href}
+                      href={href}
+                      onClick={() => setOpen(false)}
+                      className={cn(
+                        "flex items-center gap-3 rounded-[7px] px-3 py-3 transition-colors",
+                        active
+                          ? "border border-accent/25 bg-accent/[0.08] text-accent"
+                          : "border border-transparent text-muted"
+                      )}
+                    >
+                      <Icon className="size-5" />
+                      <span className="text-xs font-semibold uppercase tracking-[0.14em]">{label}</span>
+                    </Link>
+                  );
+                })}
+              </nav>
+              <div className="border-t border-line px-4 py-3">
+                <p className="text-sm font-medium">{fullName}</p>
+                <p className="microlabel mt-0.5">{roleLabel}</p>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 /** Barra de estado: el tablero siempre visible. */
 export function StatusBar({
   fullName,
+  roleLabel,
+  isAdmin,
   todayCount,
   dailyGoal,
 }: {
   fullName: string;
+  roleLabel: string;
+  isAdmin: boolean;
   todayCount: number;
   dailyGoal: number;
 }) {
   const goalReached = todayCount >= dailyGoal;
   return (
-    <header className="glass fixed inset-x-0 top-0 z-50 flex h-11 items-center gap-3 border-x-0 border-t-0 px-3 sm:px-4">
+    <header className="glass fixed inset-x-0 top-0 z-50 flex h-11 items-center gap-2 border-x-0 border-t-0 px-2 sm:gap-3 sm:px-4">
+      <MobileMenu isAdmin={isAdmin} fullName={fullName} roleLabel={roleLabel} />
       <Link href="/" className="shrink-0">
         <Logo />
       </Link>
@@ -83,7 +171,7 @@ export function StatusBar({
           segments={6}
           size="sm"
           tone={goalReached ? "success" : "accent"}
-          className="w-14"
+          className="w-12 sm:w-14"
         />
         <span className={cn("numeric text-[11px]", goalReached ? "text-success" : "text-muted")}>
           {todayCount}/{dailyGoal}
@@ -95,9 +183,11 @@ export function StatusBar({
         <span className="pulse-dot size-1.5 rounded-full bg-success" />
         En línea
       </span>
-      <Clock />
+      <span className="hidden sm:block">
+        <Clock />
+      </span>
       <span className="hidden h-4 w-px bg-line sm:block" />
-      <span className="flex size-7 items-center justify-center rounded-[6px] border border-line bg-surface2 text-[10px] font-bold text-accent">
+      <span className="hidden size-7 items-center justify-center rounded-[6px] border border-line bg-surface2 text-[10px] font-bold text-accent sm:flex">
         {initials(fullName)}
       </span>
       <form action="/auth/signout" method="post">

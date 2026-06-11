@@ -91,11 +91,13 @@ function Column({
   leads,
   total,
   onOpen,
+  registerRef,
 }: {
   status: LeadStatus;
   leads: BoardLead[];
   total: number;
   onOpen: (id: string) => void;
+  registerRef: (status: LeadStatus, el: HTMLDivElement | null) => void;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: status });
   const cfg = STATUS[status];
@@ -103,7 +105,10 @@ function Column({
 
   return (
     <div
-      ref={setNodeRef}
+      ref={(el) => {
+        setNodeRef(el);
+        registerRef(status, el);
+      }}
       className={cn(
         "flex w-[78vw] shrink-0 flex-col border border-line bg-surface/50 transition-colors sm:w-64",
         isOver && "border-accent/50 bg-accent/5"
@@ -136,6 +141,36 @@ export function Board({ initialLeads }: { initialLeads: BoardLead[] }) {
   const [leads, setLeads] = useState(initialLeads);
   const [activeId, setActiveId] = useState<string | null>(null);
   const refreshTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const railRef = useRef<HTMLDivElement | null>(null);
+  const colRefs = useRef<Partial<Record<LeadStatus, HTMLDivElement | null>>>({});
+  const [activeCol, setActiveCol] = useState<LeadStatus>(STATUS_ORDER[0]);
+
+  function registerColRef(status: LeadStatus, el: HTMLDivElement | null) {
+    colRefs.current[status] = el;
+  }
+
+  function scrollToColumn(status: LeadStatus) {
+    setActiveCol(status);
+    colRefs.current[status]?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+  }
+
+  function onRailScroll() {
+    const rail = railRef.current;
+    if (!rail) return;
+    const center = rail.scrollLeft + rail.clientWidth / 2;
+    let best: LeadStatus = activeCol;
+    let bestDist = Infinity;
+    for (const status of STATUS_ORDER) {
+      const el = colRefs.current[status];
+      if (!el) continue;
+      const dist = Math.abs(el.offsetLeft + el.offsetWidth / 2 - center);
+      if (dist < bestDist) {
+        bestDist = dist;
+        best = status;
+      }
+    }
+    if (best !== activeCol) setActiveCol(best);
+  }
 
   // El tablero se actualiza solo cuando otro usuario mueve leads (Realtime)
   useEffect(() => {
@@ -182,7 +217,36 @@ export function Board({ initialLeads }: { initialLeads: BoardLead[] }) {
 
   return (
     <DndContext sensors={sensors} onDragStart={onDragStart} onDragEnd={onDragEnd}>
-      <div className="snap-rail flex gap-2 overflow-x-auto pb-4 md:snap-none">
+      {/* Tabs de navegación rápida entre columnas (solo mobile) */}
+      <div className="-mx-4 mb-1 flex gap-1.5 overflow-x-auto px-4 pb-1 md:hidden">
+        {STATUS_ORDER.map((status) => {
+          const cfg = STATUS[status];
+          const count = leads.filter((l) => l.status === status).length;
+          const active = activeCol === status;
+          return (
+            <button
+              key={status}
+              onClick={() => scrollToColumn(status)}
+              className={cn(
+                "flex shrink-0 items-center gap-1.5 rounded-[6px] border px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.1em] transition-colors",
+                active
+                  ? "border-accent/40 bg-accent/10 text-accent"
+                  : "border-line bg-surface2 text-muted"
+              )}
+            >
+              <span className={cn("size-1.5 rounded-full", cfg.dot)} />
+              {cfg.label}
+              <span className="numeric text-[10px] opacity-70">{count}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      <div
+        ref={railRef}
+        onScroll={onRailScroll}
+        className="snap-rail flex gap-2 overflow-x-auto pb-4 md:snap-none"
+      >
         {STATUS_ORDER.map((status) => (
           <Column
             key={status}
@@ -190,6 +254,7 @@ export function Board({ initialLeads }: { initialLeads: BoardLead[] }) {
             leads={leads.filter((l) => l.status === status)}
             total={leads.length}
             onOpen={(id) => router.push(`/leads/${id}`)}
+            registerRef={registerColRef}
           />
         ))}
       </div>
