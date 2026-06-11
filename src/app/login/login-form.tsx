@@ -31,7 +31,7 @@ export function LoginForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="glass space-y-4 rounded-2xl p-6">
+    <form onSubmit={onSubmit} className="hud-ticks space-y-4 border border-line bg-surface/80 p-6 backdrop-blur-sm">
       <div>
         <Label htmlFor="email">Email</Label>
         <Input
@@ -58,7 +58,7 @@ export function LoginForm() {
       </div>
       {error && <p className="text-xs text-danger">{error}</p>}
       <Button type="submit" loading={loading} className="w-full" size="lg">
-        Ingresar
+        Ingresar al sistema
       </Button>
     </form>
   );

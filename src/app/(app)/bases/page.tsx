@@ -8,7 +8,7 @@ import { IntelPanel } from "./intel-panel";
 
 // Lotes de enriquecimiento/IA pueden tardar (webs lentas, Apify sync)
 export const maxDuration = 300;
-import { Card } from "@/components/ui/card";
+import { Card, PageHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty";
 import { timeAgo } from "@/lib/utils";
@@ -77,12 +77,11 @@ export default async function BasesPage() {
   return (
     <div className="space-y-6">
       <AutoRefresh active={hasRunning} />
-      <header>
-        <h1 className="text-xl font-semibold">Generador de bases</h1>
-        <p className="text-sm text-muted">
-          Encontrá negocios y cargalos con anti-duplicados automático.
-        </p>
-      </header>
+      <PageHeader
+        index="05"
+        title="Generador de bases"
+        sub="Encontrá negocios y cargalos con anti-duplicados automático."
+      />
 
       <section className="grid gap-4 lg:grid-cols-2">
         {apifyEnabled() ? (
@@ -103,7 +102,7 @@ export default async function BasesPage() {
       </section>
 
       <section>
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider">Inteligencia</h2>
+        <h2 className="microlabel mb-3 text-fg">Inteligencia</h2>
         <IntelPanel
           webPending={webPending.count ?? 0}
           igPending={igPending.count ?? 0}
@@ -114,7 +113,7 @@ export default async function BasesPage() {
       </section>
 
       <section>
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider">Búsquedas</h2>
+        <h2 className="microlabel mb-3 text-fg">Búsquedas</h2>
         {searches.length === 0 ? (
           <EmptyState
             icon={FileSpreadsheet}

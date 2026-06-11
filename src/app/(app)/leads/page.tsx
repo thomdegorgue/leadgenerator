@@ -12,6 +12,7 @@ import {
 import type { Lead, LeadStatus } from "@/lib/types";
 import { LeadsTable, type LeadRow } from "./leads-table";
 import { ExportButton } from "./export-button";
+import { FiltersShell } from "./filters-shell";
 
 export const dynamic = "force-dynamic";
 
@@ -132,21 +133,27 @@ export default async function LeadsPage({
   };
 
   const selectCls =
-    "h-10 rounded-lg border border-line bg-surface2 px-2.5 text-sm focus:border-accent/60 focus:outline-none";
+    "h-10 rounded-[4px] border border-line bg-surface2 px-2.5 text-sm focus:border-accent/60 focus:outline-none";
+  const activeFilters = Object.values(filters).filter(Boolean).length;
 
   return (
     <div className="space-y-4">
-      <header className="flex items-center justify-between gap-3">
+      <header className="flex flex-wrap items-end justify-between gap-3 border-b border-line pb-3">
         <div>
-          <h1 className="text-xl font-semibold">Leads</h1>
-          <p className="numeric text-sm text-muted">{count ?? 0} en tu vista</p>
+          <p className="microlabel text-accent">
+            03 <span className="text-dim">/ Leads</span>
+          </p>
+          <h1 className="mt-1 font-display text-xl font-semibold tracking-tight">
+            <span className="numeric">{(count ?? 0).toLocaleString("es-AR")}</span>{" "}
+            <span className="text-base font-normal text-muted">en tu vista</span>
+          </h1>
         </div>
         <div className="flex items-center gap-2">
           {ctx.isAdmin && <ExportButton filters={filters} />}
           {ctx.isAdmin && (
             <Link
               href="/leads/nuevo"
-              className="glow-accent inline-flex h-10 items-center gap-2 rounded-lg bg-accent px-4 text-sm font-semibold text-bg hover:bg-accent-strong"
+              className="glow-accent inline-flex h-10 items-center gap-2 rounded-[4px] bg-accent px-4 text-sm font-semibold text-bg hover:bg-accent-strong"
             >
               <Plus className="size-4" /> Nuevo
             </Link>
@@ -154,7 +161,8 @@ export default async function LeadsPage({
         </div>
       </header>
 
-      <form className="grid grid-cols-2 gap-2 md:grid-cols-4 lg:grid-cols-6" action="/leads">
+      <form action="/leads">
+        <FiltersShell activeCount={activeFilters}>
         <input
           name="q"
           defaultValue={sp.q ?? ""}
@@ -223,10 +231,11 @@ export default async function LeadsPage({
           <option value="con">Con WhatsApp</option>
           <option value="sin">Sin teléfono</option>
         </select>
-        {sp.campania && <input type="hidden" name="campania" value={sp.campania} />}
-        <button className="h-10 rounded-lg bg-surface2 border border-line px-4 text-sm hover:border-accent/40">
-          Filtrar
-        </button>
+          {sp.campania && <input type="hidden" name="campania" value={sp.campania} />}
+          <button className="h-10 rounded-[4px] bg-surface2 border border-line px-4 text-sm hover:border-accent/40 hover:text-accent-strong">
+            Filtrar
+          </button>
+        </FiltersShell>
       </form>
 
       {rows.length === 0 ? (

@@ -124,8 +124,8 @@ export function FocusDeck({
       {/* Header: meta diaria */}
       <div className="mb-4">
         <div className="flex items-center justify-between text-sm">
-          <p className="flex items-center gap-1.5 font-semibold">
-            <Zap className="size-4 text-accent" /> Modo Focus
+          <p className="microlabel flex items-center gap-1.5 text-fg">
+            <Zap className="size-3.5 text-accent" /> Modo Focus
           </p>
           <p className="numeric text-muted">
             <span className={cn(contacts >= dailyGoal && "text-success")}>{contacts}</span>/{dailyGoal} hoy
@@ -162,21 +162,21 @@ export function FocusDeck({
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, x: 240, rotate: 6, transition: { duration: 0.22 } }}
               transition={{ type: "spring", damping: 26, stiffness: 320 }}
-              className="glass flex h-full flex-col rounded-2xl p-5"
+              className="hud-ticks flex h-full flex-col border border-line bg-surface p-5"
             >
               {/* Prioridad */}
               <div className="mb-3 flex items-center gap-2">
                 {lead.status === "respondio" ? (
-                  <span className="rounded-full bg-violet-400/15 px-2.5 py-1 text-[11px] font-semibold text-violet-300">
+                  <span className="border border-violet-400/40 bg-violet-400/10 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-violet-300">
                     💬 Respondió — contestale
                   </span>
                 ) : lead.overdue ? (
-                  <span className="rounded-full bg-danger/15 px-2.5 py-1 text-[11px] font-semibold text-danger">
+                  <span className="border border-danger/40 bg-danger/10 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-danger">
                     ⏰ Seguimiento vencido
                   </span>
                 ) : (
-                  <span className="rounded-full bg-accent/15 px-2.5 py-1 text-[11px] font-semibold text-accent">
-                    ✨ Nuevo para vos
+                  <span className="border border-accent/40 bg-accent/10 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-accent">
+                    ✦ Nuevo para vos
                   </span>
                 )}
                 <span className="flex-1" />

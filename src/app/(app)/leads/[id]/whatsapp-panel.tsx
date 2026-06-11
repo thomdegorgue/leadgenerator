@@ -67,8 +67,8 @@ export function WhatsAppPanel({
   return (
     <Card className="border-accent/25">
       <div className="mb-3 flex items-center gap-2">
-        <MessageCircle className="size-4 text-accent" />
-        <h2 className="text-sm font-semibold uppercase tracking-wider">WhatsApp</h2>
+        <MessageCircle className="size-3.5 text-accent" />
+        <h2 className="microlabel text-fg">Canal directo · WhatsApp</h2>
       </div>
 
       {!lead.phone_e164 ? (

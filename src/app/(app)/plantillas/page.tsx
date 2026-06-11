@@ -1,4 +1,5 @@
 import { getCtx } from "@/lib/auth";
+import { PageHeader } from "@/components/ui/card";
 import type { MessageTemplate, Product } from "@/lib/types";
 import { TemplatesClient } from "./templates-client";
 
@@ -15,12 +16,11 @@ export default async function PlantillasPage() {
 
   return (
     <div className="space-y-4">
-      <header>
-        <h1 className="text-xl font-semibold">Plantillas de WhatsApp</h1>
-        <p className="text-sm text-muted">
-          Variables disponibles: {"{{nombre}}, {{ciudad}}, {{categoria}}, {{vendedor}}"}
-        </p>
-      </header>
+      <PageHeader
+        index="06"
+        title="Plantillas de WhatsApp"
+        sub={`Variables: {{nombre}}, {{ciudad}}, {{categoria}}, {{vendedor}}`}
+      />
       <TemplatesClient
         templates={(templates ?? []) as MessageTemplate[]}
         products={(products ?? []) as Product[]}

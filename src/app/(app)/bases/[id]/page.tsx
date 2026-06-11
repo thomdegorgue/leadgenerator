@@ -2,7 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { ArrowRight, Radar } from "lucide-react";
 import { getCtx } from "@/lib/auth";
-import { Card, StatCard } from "@/components/ui/card";
+import { Card, StatCard, StatStrip } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/status-badge";
 import { timeAgo } from "@/lib/utils";
@@ -93,7 +93,7 @@ export default async function BaseDetailPage({ params }: { params: Promise<{ id:
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-xl font-semibold">{typedSearch.name}</h1>
+            <h1 className="font-display text-xl font-semibold tracking-tight">{typedSearch.name}</h1>
             {typedSearch.archived && <Badge className="border-line text-muted">Archivada</Badge>}
           </div>
           <p className="mt-1 text-sm text-muted">
@@ -114,13 +114,13 @@ export default async function BaseDetailPage({ params }: { params: Promise<{ id:
         </Link>
       </header>
 
-      <section className="grid grid-cols-2 gap-3 lg:grid-cols-5">
+      <StatStrip cols={5}>
         <StatCard label="Leads" value={total.count ?? 0} />
         <StatCard label="Sin asignar" value={sinAsignar.count ?? 0} accent={(sinAsignar.count ?? 0) > 0} />
         <StatCard label="Contactados" value={contactados.count ?? 0} />
         <StatCard label="Tasa respuesta" value={`${tasaRespuesta}%`} />
         <StatCard label="Clientes" value={clientes.count ?? 0} />
-      </section>
+      </StatStrip>
 
       <BaseActions
         search={{

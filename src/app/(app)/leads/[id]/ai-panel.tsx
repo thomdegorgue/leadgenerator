@@ -57,8 +57,8 @@ export function AiPanel({
     <Card className="border-violet-400/25">
       <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Sparkles className="size-4 text-violet-300" />
-          <h2 className="text-sm font-semibold uppercase tracking-wider">Análisis IA</h2>
+          <Sparkles className="size-3.5 text-violet-300" />
+          <h2 className="microlabel text-fg">Análisis IA</h2>
         </div>
         {analysis && (
           <button

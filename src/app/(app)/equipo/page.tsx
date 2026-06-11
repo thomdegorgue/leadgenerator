@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { AlertTriangle } from "lucide-react";
 import { getCtx } from "@/lib/auth";
-import { Card } from "@/components/ui/card";
+import { Card, PageHeader } from "@/components/ui/card";
 import { StatusBadge } from "@/components/status-badge";
 import { timeAgo } from "@/lib/utils";
 import type { LeadStatus, Role, Team } from "@/lib/types";
@@ -85,21 +85,15 @@ export default async function EquipoPage() {
 
   return (
     <div className="space-y-6">
-      <header className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-semibold">Equipo</h1>
-          <p className="text-sm text-muted">
-            {ctx.org.name} · {memberRows.length} miembros
-          </p>
-        </div>
+      <PageHeader index="10" title="Equipo" sub={`${ctx.org.name} · ${memberRows.length} miembros`}>
         {isOwner && <InviteButton teams={typedTeams} />}
-      </header>
+      </PageHeader>
 
       <EquipoActions unassignedCount={unassigned ?? 0} teams={typedTeams} />
 
       <section>
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider">Rendimiento</h2>
-        <div className="overflow-hidden rounded-xl border border-line">
+        <h2 className="microlabel mb-3 text-fg">Rendimiento</h2>
+        <div className="overflow-hidden border border-line">
           <table className="w-full text-sm">
             <thead className="bg-surface text-left text-[11px] uppercase tracking-wider text-muted">
               <tr>
@@ -124,9 +118,7 @@ export default async function EquipoPage() {
         <section>
           <div className="mb-3 flex items-center gap-2">
             <AlertTriangle className="size-4 text-warn" />
-            <h2 className="text-sm font-semibold uppercase tracking-wider">
-              Leads estancados (+7 días sin actividad)
-            </h2>
+            <h2 className="microlabel text-fg">Leads estancados (+7 días sin actividad)</h2>
           </div>
           <Card className="divide-y divide-line p-0 sm:p-0">
             {stalled!.map((lead) => (

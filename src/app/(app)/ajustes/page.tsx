@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getCtx } from "@/lib/auth";
+import { PageHeader } from "@/components/ui/card";
 import { AjustesForm } from "./ajustes-form";
 
 export const dynamic = "force-dynamic";
@@ -19,10 +20,7 @@ export default async function AjustesPage() {
 
   return (
     <div className="mx-auto max-w-lg space-y-4">
-      <header>
-        <h1 className="text-xl font-semibold">Ajustes</h1>
-        <p className="text-sm text-muted">{ctx.org.name}</p>
-      </header>
+      <PageHeader index="11" title="Ajustes" sub={ctx.org.name} />
       <AjustesForm
         recycleDays={settings.recycle_days ?? 4}
         dailyGoal={settings.daily_goal ?? 30}

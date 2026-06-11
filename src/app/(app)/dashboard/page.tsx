@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { getCtx } from "@/lib/auth";
-import { Card, StatCard } from "@/components/ui/card";
+import { Card, StatCard, StatStrip, PageHeader } from "@/components/ui/card";
 import { STATUS, STATUS_ORDER } from "@/lib/status";
 import type { LeadStatus } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -104,12 +104,9 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="text-xl font-semibold">Dashboard ejecutivo</h1>
-        <p className="text-sm text-muted">{ctx.org.name} · números en vivo</p>
-      </header>
+      <PageHeader index="09" title="Dashboard ejecutivo" sub={`${ctx.org.name} · números en vivo`} />
 
-      <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <StatStrip cols={4}>
         <StatCard label="Leads totales" value={totalLeads} />
         <StatCard
           label="Tasa de respuesta"
@@ -122,19 +119,19 @@ export default async function DashboardPage() {
           value={fmtARS(totalRevenue)}
           hint="suma de cierres registrados"
         />
-      </section>
+      </StatStrip>
 
       <div className="grid gap-6 lg:grid-cols-2">
         <section>
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider">Funnel</h2>
+          <h2 className="microlabel mb-3 text-fg">Funnel</h2>
           <Card className="space-y-2">
             {statusCounts.map(({ status, count }) => (
               <div key={status} className="flex items-center gap-3">
                 <span className="w-24 shrink-0 text-xs text-muted">{STATUS[status as LeadStatus].label}</span>
-                <div className="h-5 flex-1 overflow-hidden rounded bg-surface2">
+                <div className="h-4 flex-1 overflow-hidden bg-surface2">
                   <div
                     className={cn(
-                      "h-full rounded transition-all",
+                      "h-full transition-all",
                       status === "cliente" ? "bg-success/70" : status === "descartado" ? "bg-zinc-600" : "bg-accent/60"
                     )}
                     style={{ width: `${Math.max((count / maxStatus) * 100, count > 0 ? 2 : 0)}%` }}
@@ -147,17 +144,17 @@ export default async function DashboardPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider">Leads nuevos por semana</h2>
+          <h2 className="microlabel mb-3 text-fg">Leads nuevos por semana</h2>
           <Card>
             <div className="flex h-36 items-end gap-2">
               {weeks.map((w, i) => (
                 <div key={i} className="flex flex-1 flex-col items-center gap-1">
                   <span className="numeric text-[10px] text-muted">{w.count}</span>
                   <div
-                    className="w-full rounded-t bg-accent/60"
+                    className="w-full bg-accent/60"
                     style={{ height: `${(w.count / maxWeek) * 100}%`, minHeight: w.count > 0 ? 4 : 1 }}
                   />
-                  <span className="text-[9px] text-muted">{w.label}</span>
+                  <span className="text-[9px] text-dim">{w.label}</span>
                 </div>
               ))}
             </div>
@@ -165,9 +162,7 @@ export default async function DashboardPage() {
 
           {sourceCounts.length > 0 && (
             <Card className="mt-3">
-              <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-muted">
-                Por fuente
-              </p>
+              <p className="microlabel mb-2">Por fuente</p>
               <div className="flex flex-wrap gap-3">
                 {sourceCounts.map((s) => (
                   <p key={s.source} className="text-sm">
@@ -183,9 +178,7 @@ export default async function DashboardPage() {
 
       <div className="grid gap-6 lg:grid-cols-2">
         <section>
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider">
-            Rendimiento por plantilla (90d)
-          </h2>
+          <h2 className="microlabel mb-3 text-fg">Rendimiento por plantilla (90d)</h2>
           {templateStats.size === 0 ? (
             <Card>
               <p className="text-sm text-muted">Todavía no hay envíos registrados.</p>
@@ -216,7 +209,7 @@ export default async function DashboardPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider">Ventas por producto</h2>
+          <h2 className="microlabel mb-3 text-fg">Ventas por producto</h2>
           {byProduct.size === 0 ? (
             <Card>
               <p className="text-sm text-muted">

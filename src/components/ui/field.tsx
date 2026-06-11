@@ -4,8 +4,8 @@ import { forwardRef } from "react";
 import { cn } from "@/lib/utils";
 
 const base =
-  "w-full rounded-lg bg-surface2 border border-line px-3 text-sm text-fg placeholder:text-muted/60 " +
-  "focus:outline-none focus:border-accent/60 focus:ring-2 focus:ring-accent/15 transition-colors";
+  "w-full rounded-[4px] bg-surface2 border border-line px-3 text-sm text-fg placeholder:text-dim " +
+  "focus:outline-none focus:border-accent/70 focus:ring-1 focus:ring-accent/25 transition-colors";
 
 export const Input = forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement>>(
   ({ className, ...props }, ref) => (
@@ -24,7 +24,11 @@ Textarea.displayName = "Textarea";
 
 export const Select = forwardRef<HTMLSelectElement, React.SelectHTMLAttributes<HTMLSelectElement>>(
   ({ className, children, ...props }, ref) => (
-    <select ref={ref} className={cn(base, "h-10 appearance-none cursor-pointer", className)} {...props}>
+    <select
+      ref={ref}
+      className={cn(base, "h-10 appearance-none cursor-pointer", className)}
+      {...props}
+    >
       {children}
     </select>
   )
@@ -32,10 +36,5 @@ export const Select = forwardRef<HTMLSelectElement, React.SelectHTMLAttributes<H
 Select.displayName = "Select";
 
 export function Label({ className, ...props }: React.LabelHTMLAttributes<HTMLLabelElement>) {
-  return (
-    <label
-      className={cn("block text-xs font-medium text-muted mb-1.5 uppercase tracking-wider", className)}
-      {...props}
-    />
-  );
+  return <label className={cn("microlabel mb-1.5 block", className)} {...props} />;
 }

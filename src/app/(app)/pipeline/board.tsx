@@ -30,13 +30,15 @@ export interface BoardLead {
 }
 
 function LeadCard({ lead, overlay = false }: { lead: BoardLead; overlay?: boolean }) {
+  const cfg = STATUS[lead.status];
   return (
     <div
       className={cn(
-        "rounded-lg border border-line bg-surface2 p-3 text-left shadow-sm",
+        "relative rounded-[3px] border border-line bg-surface2 p-3 pl-3.5 text-left",
         overlay && "glow-accent rotate-2 border-accent/50"
       )}
     >
+      <span className={cn("absolute inset-y-0 left-0 w-[2px]", cfg.dot)} />
       <p className="truncate text-sm font-medium">{lead.name}</p>
       <div className="mt-1.5 flex items-center justify-between gap-2">
         <p className="truncate text-xs text-muted">{lead.city ?? "—"}</p>
@@ -87,31 +89,40 @@ function DraggableCard({ lead, onOpen }: { lead: BoardLead; onOpen: () => void }
 function Column({
   status,
   leads,
+  total,
   onOpen,
 }: {
   status: LeadStatus;
   leads: BoardLead[];
+  total: number;
   onOpen: (id: string) => void;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: status });
   const cfg = STATUS[status];
+  const share = total > 0 ? (leads.length / total) * 100 : 0;
 
   return (
     <div
       ref={setNodeRef}
       className={cn(
-        "flex w-64 shrink-0 flex-col rounded-xl border border-line bg-surface/60 transition-colors",
+        "flex w-[78vw] shrink-0 flex-col border border-line bg-surface/50 transition-colors sm:w-64",
         isOver && "border-accent/50 bg-accent/5"
       )}
     >
-      <div className="flex items-center gap-2 px-3 py-2.5">
-        <span className={cn("size-2 rounded-full", cfg.dot)} />
-        <p className="text-xs font-semibold uppercase tracking-wider">{cfg.label}</p>
-        <span className="numeric ml-auto rounded-full bg-surface2 px-2 py-0.5 text-[10px] text-muted">
-          {leads.length}
-        </span>
+      <div className="px-3 py-2.5">
+        <div className="flex items-center gap-2">
+          <span className={cn("size-1.5", cfg.dot)} />
+          <p className="microlabel text-fg">{cfg.label}</p>
+          <span className="numeric ml-auto text-[11px] text-muted">{leads.length}</span>
+        </div>
+        <div className="mt-2 h-[2px] bg-surface2">
+          <div className={cn("h-full transition-all", cfg.dot)} style={{ width: `${share}%` }} />
+        </div>
       </div>
-      <div className="flex-1 space-y-2 overflow-y-auto px-2 pb-2" style={{ maxHeight: "calc(100dvh - 250px)" }}>
+      <div
+        className="flex-1 space-y-1.5 overflow-y-auto px-2 pb-2"
+        style={{ maxHeight: "calc(100dvh - 270px)" }}
+      >
         {leads.map((lead) => (
           <DraggableCard key={lead.id} lead={lead} onOpen={() => onOpen(lead.id)} />
         ))}
@@ -171,12 +182,13 @@ export function Board({ initialLeads }: { initialLeads: BoardLead[] }) {
 
   return (
     <DndContext sensors={sensors} onDragStart={onDragStart} onDragEnd={onDragEnd}>
-      <div className="flex gap-3 overflow-x-auto pb-4">
+      <div className="snap-rail flex gap-2 overflow-x-auto pb-4 md:snap-none">
         {STATUS_ORDER.map((status) => (
           <Column
             key={status}
             status={status}
             leads={leads.filter((l) => l.status === status)}
+            total={leads.length}
             onOpen={(id) => router.push(`/leads/${id}`)}
           />
         ))}

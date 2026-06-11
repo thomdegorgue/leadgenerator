@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
-import { Card } from "@/components/ui/card";
 import { StatusBadge } from "@/components/status-badge";
 import { DISCARD_REASONS, STATUS, STATUS_ORDER } from "@/lib/status";
 import { assignLead, bulkLeads, type BulkAction } from "@/server/leads";
@@ -98,32 +97,37 @@ export function LeadsTable({
     <>
       {message && <p className="text-xs text-muted">{message}</p>}
 
-      {/* Mobile: cards */}
-      <div className="space-y-2 md:hidden">
-        {rows.map((lead) => (
-          <Card key={lead.id} className="flex items-center gap-3 py-3">
+      {/* Mobile: filas densas */}
+      <div className="border border-line bg-surface md:hidden">
+        {rows.map((lead, i) => (
+          <div
+            key={lead.id}
+            className={cn("flex items-center gap-3 px-3 py-3", i > 0 && "border-t border-line")}
+          >
             {isAdmin && (
               <input
                 type="checkbox"
                 checked={selected.has(lead.id)}
                 onChange={() => toggle(lead.id)}
-                className="size-4 accent-[var(--accent)]"
+                className="size-4 shrink-0 accent-[var(--accent)]"
               />
             )}
             <Link href={`/leads/${lead.id}`} className="min-w-0 flex-1">
               <p className="truncate text-sm font-medium">{lead.name}</p>
-              <p className="truncate text-xs text-muted">
+              <p className="truncate text-[11px] text-dim">
                 {[lead.category, lead.city].filter(Boolean).join(" · ") || "—"}
               </p>
             </Link>
-            <ScoreBadge top={lead.topScore} />
-            <StatusBadge status={lead.status} />
-          </Card>
+            <div className="flex shrink-0 flex-col items-end gap-1">
+              <ScoreBadge top={lead.topScore} />
+              <StatusBadge status={lead.status} />
+            </div>
+          </div>
         ))}
       </div>
 
       {/* Desktop: tabla */}
-      <div className="hidden overflow-hidden rounded-xl border border-line md:block">
+      <div className="hidden overflow-hidden border border-line md:block">
         <table className="w-full text-sm">
           <thead className="bg-surface text-left text-[11px] uppercase tracking-wider text-muted">
             <tr>
@@ -209,7 +213,7 @@ export function LeadsTable({
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 24 }}
-            className="glass fixed inset-x-3 bottom-20 z-40 flex flex-wrap items-center gap-2 rounded-xl p-3 md:bottom-6 md:left-64 md:right-6"
+            className="glass hud-ticks fixed inset-x-3 bottom-24 z-40 flex flex-wrap items-center gap-2 rounded-[6px] p-3 md:bottom-6 md:left-52 md:right-6"
           >
             <span className="numeric rounded-full bg-accent/15 px-2.5 py-1 text-xs font-semibold text-accent">
               {selected.size}

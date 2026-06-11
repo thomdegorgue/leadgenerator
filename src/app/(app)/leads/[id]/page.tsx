@@ -140,7 +140,9 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex items-center gap-3">
-            <h1 className="truncate text-xl font-semibold">{typedLead.name}</h1>
+            <h1 className="truncate font-display text-xl font-semibold tracking-tight">
+              {typedLead.name}
+            </h1>
             <StatusBadge status={typedLead.status} />
           </div>
           <p className="mt-1 text-sm text-muted">
@@ -204,7 +206,7 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
           />
 
           <section>
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider">Historial</h2>
+            <h2 className="microlabel mb-3 text-fg">Historial</h2>
             <NoteForm leadId={typedLead.id} />
             {activities?.length ? (
               <Card className="mt-3 divide-y divide-line p-0 sm:p-0">
@@ -231,9 +233,7 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
         <div className="space-y-5">
           {(scores?.length ?? 0) > 0 && (
             <section>
-              <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider">
-                Oportunidad por producto
-              </h2>
+              <h2 className="microlabel mb-3 text-fg">Oportunidad por producto</h2>
               <div className="space-y-2">
                 {(scores as (LeadScore & { products: { name: string } | null })[]).map((s) => (
                   <Card key={s.id} className="flex items-center gap-4 py-3">
@@ -251,7 +251,7 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
           )}
 
           <section>
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider">Datos</h2>
+            <h2 className="microlabel mb-3 text-fg">Datos</h2>
             <Card className="space-y-2.5 text-sm">
               <p className="flex items-center gap-2 text-muted">
                 <Phone className="size-4 shrink-0" />

@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getCtx } from "@/lib/auth";
 import { Megaphone } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty";
+import { PageHeader } from "@/components/ui/card";
 import type { LeadStatus, Team } from "@/lib/types";
 import { CampaignsClient, type CampaignCard } from "./campaigns-client";
 
@@ -52,12 +53,11 @@ export default async function CampanasPage() {
 
   return (
     <div className="space-y-4">
-      <header>
-        <h1 className="text-xl font-semibold">Campañas</h1>
-        <p className="text-sm text-muted">
-          Producto + filtro + equipo: un frente de ataque medible.
-        </p>
-      </header>
+      <PageHeader
+        index="07"
+        title="Campañas"
+        sub="Producto + filtro + equipo: un frente de ataque medible."
+      />
 
       <CampaignsClient
         campaigns={cards}

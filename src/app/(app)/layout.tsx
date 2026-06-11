@@ -1,5 +1,5 @@
 import { getCtx } from "@/lib/auth";
-import { Sidebar, BottomNav, MobileTopbar } from "@/components/shell/shell";
+import { Sidebar, BottomNav, StatusBar } from "@/components/shell/shell";
 import { CommandPalette } from "@/components/command-palette";
 
 const ROLE_LABELS: Record<string, string> = {
@@ -15,9 +15,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="min-h-dvh">
-      <Sidebar isAdmin={ctx.isAdmin} fullName={fullName} roleLabel={roleLabel} />
-      <MobileTopbar fullName={fullName} />
-      <main className="px-4 pb-24 pt-4 sm:px-6 md:ml-60 md:pb-10 md:pt-8">
+      <StatusBar fullName={fullName} />
+      <Sidebar isAdmin={ctx.isAdmin} roleLabel={`${roleLabel} · ${ctx.org.name}`} />
+      <main className="px-4 pb-28 pt-16 sm:px-6 md:ml-48 md:pb-10 md:pt-[4.5rem]">
         <div className="mx-auto max-w-6xl">{children}</div>
       </main>
       <BottomNav isAdmin={ctx.isAdmin} />

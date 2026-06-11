@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getCtx } from "@/lib/auth";
+import { PageHeader } from "@/components/ui/card";
 import type { Product } from "@/lib/types";
 import { ProductsClient } from "./products-client";
 
@@ -20,12 +21,11 @@ export default async function ProductosPage() {
 
   return (
     <div className="space-y-4">
-      <header>
-        <h1 className="text-xl font-semibold">Productos</h1>
-        <p className="text-sm text-muted">
-          Cada SaaS o servicio que vendés. El score y la IA se adaptan solos al darlos de alta.
-        </p>
-      </header>
+      <PageHeader
+        index="08"
+        title="Productos"
+        sub="Cada SaaS o servicio que vendés. El score y la IA se adaptan solos."
+      />
       <ProductsClient
         products={(products ?? []) as Product[]}
         isOwner={ctx.profile.is_super_admin || ctx.role === "owner"}
