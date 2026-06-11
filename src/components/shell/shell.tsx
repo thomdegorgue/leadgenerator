@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LogOut } from "lucide-react";
 import { navFor } from "./nav";
+import { SegmentGauge } from "@/components/ui/segment-gauge";
 import { cn, initials } from "@/lib/utils";
 
 function isActive(pathname: string, href: string) {
@@ -56,8 +57,17 @@ function Clock() {
   return <span className="numeric text-[11px] text-muted">{time ?? "--:--:--"}</span>;
 }
 
-/** Barra de estado superior: el sistema está vivo. */
-export function StatusBar({ fullName }: { fullName: string }) {
+/** Barra de estado: el tablero siempre visible. */
+export function StatusBar({
+  fullName,
+  todayCount,
+  dailyGoal,
+}: {
+  fullName: string;
+  todayCount: number;
+  dailyGoal: number;
+}) {
+  const goalReached = todayCount >= dailyGoal;
   return (
     <header className="glass fixed inset-x-0 top-0 z-50 flex h-11 items-center gap-3 border-x-0 border-t-0 px-3 sm:px-4">
       <Link href="/" className="shrink-0">
@@ -65,18 +75,34 @@ export function StatusBar({ fullName }: { fullName: string }) {
       </Link>
       <span className="microlabel hidden lg:block">Sistema Operativo Comercial</span>
       <span className="flex-1" />
-      <span className="hidden items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-success sm:flex">
+
+      <span className="flex items-center gap-2" title={`Meta diaria: ${todayCount}/${dailyGoal} contactos`}>
+        <span className="microlabel hidden sm:block">Meta</span>
+        <SegmentGauge
+          ratio={dailyGoal > 0 ? todayCount / dailyGoal : 0}
+          segments={6}
+          size="sm"
+          tone={goalReached ? "success" : "accent"}
+          className="w-14"
+        />
+        <span className={cn("numeric text-[11px]", goalReached ? "text-success" : "text-muted")}>
+          {todayCount}/{dailyGoal}
+        </span>
+      </span>
+
+      <span className="hidden h-4 w-px bg-line sm:block" />
+      <span className="hidden items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-success sm:flex">
         <span className="pulse-dot size-1.5 rounded-full bg-success" />
         En línea
       </span>
       <Clock />
       <span className="hidden h-4 w-px bg-line sm:block" />
-      <span className="flex size-7 items-center justify-center rounded-[4px] border border-line bg-surface2 text-[10px] font-bold text-accent">
+      <span className="flex size-7 items-center justify-center rounded-[6px] border border-line bg-surface2 text-[10px] font-bold text-accent">
         {initials(fullName)}
       </span>
       <form action="/auth/signout" method="post">
         <button
-          className="rounded-[4px] p-1.5 text-dim hover:bg-surface2 hover:text-danger"
+          className="rounded-[6px] p-1.5 text-dim hover:bg-surface2 hover:text-danger"
           title="Cerrar sesión"
         >
           <LogOut className="size-4" />
@@ -86,29 +112,33 @@ export function StatusBar({ fullName }: { fullName: string }) {
   );
 }
 
-/** Rail lateral desktop: módulos numerados. */
+/** Navegación lateral: el módulo activo es la marcha engranada. */
 export function Sidebar({ isAdmin, roleLabel }: { isAdmin: boolean; roleLabel: string }) {
   const pathname = usePathname();
   const items = navFor(isAdmin);
 
   return (
-    <aside className="fixed bottom-0 left-0 top-11 z-40 hidden w-48 flex-col border-r border-line bg-surface md:flex">
-      <nav className="flex-1 overflow-y-auto py-3">
-        {items.map(({ href, label, icon: Icon }, i) => {
+    <aside className="fixed bottom-0 left-0 top-11 z-40 hidden w-48 flex-col border-r border-line bg-surface2 md:flex">
+      <nav className="flex-1 space-y-1 overflow-y-auto p-2">
+        {items.map(({ href, label, icon: Icon }) => {
           const active = isActive(pathname, href);
           return (
             <Link
               key={href}
               href={href}
               className={cn(
-                "group relative flex items-center gap-3 px-4 py-2.5 transition-colors",
-                active ? "bg-accent/[0.06] text-accent" : "text-muted hover:bg-surface2 hover:text-fg"
+                "flex items-center gap-3 rounded-[7px] px-3 py-2.5 transition-colors",
+                active
+                  ? "border border-accent/25 bg-accent/[0.08] text-accent"
+                  : "border border-transparent text-muted hover:bg-surface hover:text-fg"
               )}
             >
-              {active && <span className="absolute inset-y-1 left-0 w-[2px] bg-accent" />}
-              <span className={cn("numeric text-[9px]", active ? "text-accent/70" : "text-dim")}>
-                {String(i + 1).padStart(2, "0")}
-              </span>
+              <span
+                className={cn(
+                  "size-1 rounded-full",
+                  active ? "bg-accent" : "bg-transparent"
+                )}
+              />
               <Icon className="size-4" />
               <span className="text-[11px] font-semibold uppercase tracking-[0.14em]">{label}</span>
             </Link>
@@ -122,7 +152,7 @@ export function Sidebar({ isAdmin, roleLabel }: { isAdmin: boolean; roleLabel: s
   );
 }
 
-/** Dock mobile: Focus como botón central elevado. */
+/** Dock mobile con el botón START (Focus) al centro. */
 export function BottomNav({ isAdmin }: { isAdmin: boolean }) {
   const pathname = usePathname();
   const mobileItems = navFor(isAdmin).filter((i) => i.mobile);
@@ -156,11 +186,13 @@ export function BottomNav({ isAdmin }: { isAdmin: boolean }) {
           <Link href="/focus" className="flex flex-col items-center px-3" aria-label="Modo Focus">
             <span
               className={cn(
-                "glow-accent -mt-5 flex size-12 items-center justify-center rounded-full border-4 border-bg",
+                "glow-accent -mt-5 flex size-12 flex-col items-center justify-center rounded-full border-4 border-bg",
                 isActive(pathname, "/focus") ? "bg-accent-strong" : "bg-accent"
               )}
+              style={{ boxShadow: "0 0 0 1.5px color-mix(in srgb, var(--accent) 40%, transparent)" }}
             >
-              <focus.icon className="size-5 text-bg" />
+              <focus.icon className="size-4 text-bg" />
+              <span className="text-[6px] font-bold tracking-[0.14em] text-bg">START</span>
             </span>
             <span
               className={cn(

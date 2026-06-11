@@ -81,7 +81,7 @@ export function BaseActions({
       mode
     );
     setBusy(false);
-    flash(result.ok ? `✅ ${result.assigned} leads asignados.` : `⚠️ ${result.error}`);
+    flash(result.ok ? `${result.assigned} leads asignados.` : result.error);
     router.refresh();
   }
 
@@ -89,7 +89,7 @@ export function BaseActions({
     setBusy(true);
     const result = await rerunSearch(search.id);
     setBusy(false);
-    flash(result.ok ? "🔄 Búsqueda relanzada — solo van a entrar negocios nuevos." : `⚠️ ${result.error}`);
+    flash(result.ok ? "Búsqueda relanzada — solo van a entrar negocios nuevos." : result.error);
     router.refresh();
   }
 
@@ -101,7 +101,7 @@ export function BaseActions({
       router.push("/bases");
       router.refresh();
     } else {
-      flash(`⚠️ ${result.error}`);
+      flash(result.error);
       setDeleteOpen(false);
     }
   }

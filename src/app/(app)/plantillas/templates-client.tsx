@@ -197,7 +197,7 @@ export function TemplatesClient({
               rows={5}
               value={body}
               onChange={(e) => setBody(e.target.value)}
-              placeholder="Hola {{nombre}} 👋 ..."
+              placeholder="Hola {{nombre}}, vi que..."
             />
             <div className="mt-2 flex flex-wrap gap-1.5">
               {TEMPLATE_VARIABLES.map((v) => (

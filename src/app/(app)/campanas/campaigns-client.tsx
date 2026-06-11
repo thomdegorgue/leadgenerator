@@ -66,7 +66,7 @@ export function CampaignsClient({
       return;
     }
     setOpen(false);
-    setMessage(`✅ Campaña creada con ${result.added} leads.`);
+    setMessage(`Campaña creada con ${result.added} leads.`);
     router.refresh();
   }
 
@@ -74,7 +74,7 @@ export function CampaignsClient({
     setBusyId(id);
     const result = await distributeCampaign(id);
     setBusyId(null);
-    setMessage(result.ok ? `✅ ${result.assigned} leads repartidos al equipo.` : `⚠️ ${result.error}`);
+    setMessage(result.ok ? `${result.assigned} leads repartidos al equipo.` : result.error);
     router.refresh();
   }
 
@@ -99,7 +99,7 @@ export function CampaignsClient({
                     <p className="truncate font-medium">{c.name}</p>
                   </div>
                   <p className="mt-1 text-xs text-muted">
-                    {[c.productName && `🎯 ${c.productName}`, c.teamName && `👥 ${c.teamName}`]
+                    {[c.productName, c.teamName && `Equipo ${c.teamName}`]
                       .filter(Boolean)
                       .join(" · ") || "Sin producto ni equipo"}
                   </p>

@@ -12,8 +12,8 @@ export function EmptyState({
   action?: React.ReactNode;
 }) {
   return (
-    <div className="hud-ticks flex flex-col items-center justify-center border border-line bg-surface py-14 px-6 text-center">
-      <div className="mb-3 border border-line bg-surface2 p-3 text-dim">
+    <div className="tile flex flex-col items-center justify-center py-14 px-6 text-center">
+      <div className="inset mb-3 p-3 text-dim">
         <Icon className="size-6" />
       </div>
       <p className="font-display text-sm font-medium">{title}</p>

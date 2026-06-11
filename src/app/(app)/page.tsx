@@ -77,21 +77,25 @@ export default async function HomePage() {
   return (
     <div className="space-y-6">
       <header className="flex flex-wrap items-end justify-between gap-3 border-b border-line pb-3">
-        <div>
-          <p className="microlabel text-accent">
-            01 <span className="text-dim">/ Centro de comando</span>
-          </p>
-          <h1 className="mt-1 font-display text-xl font-semibold tracking-tight">
-            Hola, {firstName}
-          </h1>
-        </div>
+        <h1 className="font-display text-xl font-semibold tracking-tight">Hola, {firstName}</h1>
         <p className="microlabel">{fecha}</p>
       </header>
 
       <StatStrip cols={4}>
         <StatCard label="Leads activos" value={activos.count ?? 0} />
-        <StatCard label="Para contactar" value={paraContactar.count ?? 0} accent />
-        <StatCard label="Respondieron" value={respondieron.count ?? 0} />
+        <StatCard
+          label="Para contactar"
+          value={paraContactar.count ?? 0}
+          accent
+          gauge={(activos.count ?? 0) > 0 ? (paraContactar.count ?? 0) / (activos.count ?? 1) : 0}
+          redline={2}
+        />
+        <StatCard
+          label="Respondieron"
+          value={respondieron.count ?? 0}
+          gauge={(activos.count ?? 0) > 0 ? (respondieron.count ?? 0) / (activos.count ?? 1) : 0}
+          gaugeTone="success"
+        />
         <StatCard
           label="WhatsApps hoy"
           value={contactadosHoy.count ?? 0}
@@ -142,7 +146,7 @@ export default async function HomePage() {
         </div>
 
         <div>
-          <h2 className="microlabel mb-3 text-fg">Registro de actividad</h2>
+          <h2 className="microlabel mb-3 text-fg">Telemetría del equipo</h2>
           {actividad?.length ? (
             <Card className="space-y-0 p-0 sm:p-0">
               {actividad.map((a, i) => {

@@ -20,10 +20,11 @@ export default async function AjustesPage() {
 
   return (
     <div className="mx-auto max-w-lg space-y-4">
-      <PageHeader index="11" title="Ajustes" sub={ctx.org.name} />
+      <PageHeader title="Ajustes" sub={ctx.org.name} />
       <AjustesForm
         recycleDays={settings.recycle_days ?? 4}
         dailyGoal={settings.daily_goal ?? 30}
+        currentName={ctx.profile.full_name ?? ""}
       />
     </div>
   );

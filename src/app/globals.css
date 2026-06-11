@@ -1,24 +1,26 @@
 @import "tailwindcss";
 
 /* ============================================================
-   ARGOS — design system "HUD / instrumento de comando"
-   Grilla técnica, hairlines, datos en mono, cian quirúrgico.
+   ARGOS — design system "Cockpit"
+   Tablero digital: paneles sólidos con peso, gauges segmentados,
+   números de cluster, cian accionable y zona roja para lo crítico.
    ============================================================ */
 
 :root {
-  --bg: #05070c;
-  --surface: #070b12;
-  --surface-2: #0b1018;
-  --line: #1b2535;
-  --line-strong: #2a3a52;
-  --fg: #e8eef6;
-  --muted: #76839b;
-  --dim: #5a6578;
-  --accent: #2be4ff;
-  --accent-strong: #7df0ff;
+  --bg: #0a0d11;
+  --surface: #12171d;
+  --surface-2: #0d1116;
+  --line: #222b35;
+  --line-strong: #2a333d;
+  --fg: #f2f5f8;
+  --muted: #8e99a6;
+  --dim: #5c6671;
+  --accent: #39e1f8;
+  --accent-strong: #7deeff;
+  --accent-press: #1fa8bd;
   --success: #3ddc97;
   --warn: #f5b94b;
-  --danger: #ff6b6b;
+  --danger: #ff4757;
 }
 
 @theme inline {
@@ -32,6 +34,7 @@
   --color-dim: var(--dim);
   --color-accent: var(--accent);
   --color-accent-strong: var(--accent-strong);
+  --color-accent-press: var(--accent-press);
   --color-success: var(--success);
   --color-warn: var(--warn);
   --color-danger: var(--danger);
@@ -56,63 +59,52 @@ body {
 
 * {
   scrollbar-width: thin;
-  scrollbar-color: var(--line) transparent;
+  scrollbar-color: var(--line-strong) transparent;
 }
 *::-webkit-scrollbar { width: 8px; height: 8px; }
-*::-webkit-scrollbar-thumb { background: var(--line); border-radius: 8px; }
+*::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 8px; }
 *::-webkit-scrollbar-track { background: transparent; }
 
-/* Microetiqueta de sistema: 10px, mayúsculas, tracking ancho */
+/* Microetiqueta de tablero */
 .microlabel {
   font-size: 10px;
-  letter-spacing: 0.22em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--dim);
   font-weight: 600;
 }
 
-/* Ticks de registro HUD en las 4 esquinas */
-.hud-ticks {
-  position: relative;
+/* Panel con peso físico: borde inferior tipo tecla de consola */
+.tile {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-bottom: 2px solid var(--line-strong);
+  border-radius: 10px;
 }
-.hud-ticks::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0.75;
-  background-image:
-    linear-gradient(var(--accent), var(--accent)),
-    linear-gradient(var(--accent), var(--accent)),
-    linear-gradient(var(--accent), var(--accent)),
-    linear-gradient(var(--accent), var(--accent)),
-    linear-gradient(var(--accent), var(--accent)),
-    linear-gradient(var(--accent), var(--accent)),
-    linear-gradient(var(--accent), var(--accent)),
-    linear-gradient(var(--accent), var(--accent));
-  background-position:
-    top left, top left,
-    top right, top right,
-    bottom left, bottom left,
-    bottom right, bottom right;
-  background-size:
-    10px 1px, 1px 10px,
-    10px 1px, 1px 10px,
-    10px 1px, 1px 10px,
-    10px 1px, 1px 10px;
-  background-repeat: no-repeat;
+.tile-hover {
+  transition: transform 150ms ease, border-color 150ms ease;
+}
+.tile-hover:hover {
+  transform: translateY(-1px);
+  border-bottom-color: color-mix(in srgb, var(--accent) 55%, var(--line-strong));
 }
 
-/* Superficie translúcida (barras fijas) */
+/* Zona de datos hundida */
+.inset {
+  background: var(--surface-2);
+  border-radius: 8px;
+}
+
+/* Barras fijas translúcidas */
 .glass {
-  background: color-mix(in srgb, var(--surface) 86%, transparent);
+  background: color-mix(in srgb, var(--surface-2) 90%, transparent);
   backdrop-filter: blur(14px);
   border: 1px solid var(--line);
 }
 
-/* Glow contenido: solo para la acción primaria */
+/* Glow contenido: solo la acción primaria */
 .glow-accent {
-  box-shadow: 0 0 22px -8px color-mix(in srgb, var(--accent) 60%, transparent);
+  box-shadow: 0 0 22px -9px color-mix(in srgb, var(--accent) 65%, transparent);
 }
 
 /* Números/datos siempre en mono tabular */
@@ -121,25 +113,12 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-/* Fondo técnico: gradiente frío + grilla */
+/* Fondo del login */
 .argos-bg {
   position: relative;
   background:
-    radial-gradient(ellipse 80% 60% at 70% -10%, color-mix(in srgb, var(--accent) 12%, transparent), transparent),
-    radial-gradient(ellipse 60% 50% at 10% 110%, color-mix(in srgb, var(--accent) 7%, transparent), transparent),
+    radial-gradient(ellipse 80% 60% at 70% -10%, color-mix(in srgb, var(--accent) 10%, transparent), transparent),
     var(--bg);
-}
-.argos-bg::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background-image:
-    linear-gradient(var(--line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--line) 1px, transparent 1px);
-  background-size: 44px 44px;
-  opacity: 0.22;
-  mask-image: radial-gradient(ellipse 70% 60% at 50% 30%, black, transparent);
 }
 
 @keyframes pulse-dot {
@@ -148,12 +127,21 @@ body {
 }
 .pulse-dot { animation: pulse-dot 2.2s ease-in-out infinite; }
 
-/* Anillo del ojo de ARGOS (login) */
+/* Anillo del logo en el login */
 @keyframes eye-scan {
   0%, 100% { transform: rotate(0deg); }
   50% { transform: rotate(180deg); }
 }
 .eye-ring { animation: eye-scan 9s ease-in-out infinite; }
+
+/* Encendido de los bloques de un gauge segmentado */
+@keyframes seg-on {
+  from { opacity: 0; transform: scaleY(0.4); }
+  to { opacity: 1; transform: scaleY(1); }
+}
+.seg-on {
+  animation: seg-on 180ms ease-out backwards;
+}
 
 /* Snap horizontal del pipeline en mobile */
 .snap-rail {
@@ -161,4 +149,9 @@ body {
 }
 .snap-rail > * {
   scroll-snap-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .seg-on, .eye-ring, .pulse-dot { animation: none; }
+  .tile-hover, .tile-hover:hover { transition: none; transform: none; }
 }

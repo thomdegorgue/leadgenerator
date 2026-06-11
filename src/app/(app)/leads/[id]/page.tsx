@@ -43,7 +43,7 @@ const ACTIVITY_ICONS: Record<string, React.ReactNode> = {
 };
 
 const RESULT_LABELS: Record<string, string> = {
-  respondio: "Respondió ✅",
+  respondio: "Respondió",
   sin_respuesta: "Sin respuesta",
   numero_invalido: "Número inválido",
 };
@@ -224,7 +224,7 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
               </Card>
             ) : (
               <p className="mt-3 text-sm text-muted">
-                Nadie contactó este lead todavía. Sé el primero 🚀
+                Todavía no hay contactos registrados con este lead.
               </p>
             )}
           </section>

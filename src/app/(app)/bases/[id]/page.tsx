@@ -104,7 +104,7 @@ export default async function BaseDetailPage({ params }: { params: Promise<{ id:
           </p>
           {typedSearch.products?.name && (
             <Badge className="mt-2 border-accent/30 bg-accent/10 text-accent">
-              🎯 Producto objetivo: {typedSearch.products.name}
+              Producto objetivo: {typedSearch.products.name}
             </Badge>
           )}
           {typedSearch.notes && <p className="mt-2 max-w-xl text-sm text-muted">{typedSearch.notes}</p>}

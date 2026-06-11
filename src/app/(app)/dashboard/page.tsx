@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getCtx } from "@/lib/auth";
 import { Card, StatCard, StatStrip, PageHeader } from "@/components/ui/card";
+import { SegmentGauge } from "@/components/ui/segment-gauge";
 import { STATUS, STATUS_ORDER } from "@/lib/status";
 import type { LeadStatus } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -126,17 +127,15 @@ export default async function DashboardPage() {
           <h2 className="microlabel mb-3 text-fg">Funnel</h2>
           <Card className="space-y-2">
             {statusCounts.map(({ status, count }) => (
-              <div key={status} className="flex items-center gap-3">
+              <div key={status} className="flex items-center gap-3 py-0.5">
                 <span className="w-24 shrink-0 text-xs text-muted">{STATUS[status as LeadStatus].label}</span>
-                <div className="h-4 flex-1 overflow-hidden bg-surface2">
-                  <div
-                    className={cn(
-                      "h-full transition-all",
-                      status === "cliente" ? "bg-success/70" : status === "descartado" ? "bg-zinc-600" : "bg-accent/60"
-                    )}
-                    style={{ width: `${Math.max((count / maxStatus) * 100, count > 0 ? 2 : 0)}%` }}
-                  />
-                </div>
+                <SegmentGauge
+                  ratio={count / maxStatus}
+                  segments={16}
+                  size="sm"
+                  tone={status === "cliente" ? "success" : status === "descartado" ? "warn" : "accent"}
+                  className="flex-1"
+                />
                 <span className="numeric w-12 shrink-0 text-right text-sm">{count}</span>
               </div>
             ))}

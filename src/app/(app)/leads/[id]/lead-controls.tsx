@@ -151,7 +151,7 @@ export function LeadControls({
         <Pencil className="size-3.5" /> Editar datos
       </Link>
 
-      <Modal open={dealOpen} onClose={() => setDealOpen(false)} title="🏆 Registrar venta">
+      <Modal open={dealOpen} onClose={() => setDealOpen(false)} title="Registrar venta">
         <form onSubmit={onDeal} className="space-y-4">
           <div>
             <Label htmlFor="deal-product">Producto vendido</Label>
@@ -168,7 +168,7 @@ export function LeadControls({
             <Input id="deal-value" name="value" type="number" min={0} step="any" placeholder="45000" />
           </div>
           <Button type="submit" loading={dealSaving} className="w-full">
-            Marcar como cliente 🎉
+            Marcar como cliente
           </Button>
         </form>
       </Modal>

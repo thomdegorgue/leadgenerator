@@ -31,7 +31,7 @@ export function LoginForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="hud-ticks space-y-4 border border-line bg-surface/80 p-6 backdrop-blur-sm">
+    <form onSubmit={onSubmit} className="tile space-y-4 p-6">
       <div>
         <Label htmlFor="email">Email</Label>
         <Input

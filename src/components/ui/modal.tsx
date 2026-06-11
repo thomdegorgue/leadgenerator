@@ -42,7 +42,7 @@ export function Modal({
             exit={{ opacity: 0, y: 28, scale: 0.985 }}
             transition={{ type: "spring", damping: 28, stiffness: 350 }}
             onClick={(e) => e.stopPropagation()}
-            className="hud-ticks w-full border border-line bg-surface sm:max-w-lg rounded-t-[8px] sm:rounded-[6px] p-5 max-h-[92vh] overflow-y-auto"
+            className="tile w-full sm:max-w-lg rounded-t-[14px] sm:rounded-[10px] p-5 max-h-[92vh] overflow-y-auto"
           >
             <div className="mb-4 flex items-center justify-between border-b border-line pb-3">
               <h2 className="font-display text-sm font-semibold uppercase tracking-[0.14em]">

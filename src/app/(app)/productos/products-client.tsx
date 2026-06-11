@@ -67,7 +67,7 @@ export function ProductsClient({
     setMessage(null);
     const result = await recalcAllScores();
     setRecalcing(false);
-    setMessage(result.ok ? `✅ Scores recalculados para ${result.count} leads.` : `⚠️ ${result.error}`);
+    setMessage(result.ok ? `Scores recalculados para ${result.count} leads.` : result.error);
     router.refresh();
   }
 

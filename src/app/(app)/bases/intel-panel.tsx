@@ -73,7 +73,7 @@ function Runner({
           ) : remaining > 0 ? (
             `${remaining} leads pendientes — ${description}`
           ) : (
-            "Todo al día ✓"
+            "Al día — sin pendientes"
           )}
         </p>
       </div>

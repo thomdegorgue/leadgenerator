@@ -26,13 +26,10 @@ export default async function PipelinePage() {
   return (
     <div className="flex h-full flex-col gap-4">
       <header className="border-b border-line pb-3">
-        <p className="microlabel text-accent">
-          04 <span className="text-dim">/ Pipeline</span>
+        <h1 className="font-display text-xl font-semibold tracking-tight">Pipeline</h1>
+        <p className="mt-0.5 text-sm text-muted">
+          <span className="numeric text-fg">{leads.length}</span> leads en juego — arrastrá para mover
         </p>
-        <h1 className="mt-1 font-display text-xl font-semibold tracking-tight">
-          <span className="numeric">{leads.length}</span>{" "}
-          <span className="text-base font-normal text-muted">leads en juego — arrastrá para mover</span>
-        </h1>
       </header>
       <Board initialLeads={leads} />
     </div>

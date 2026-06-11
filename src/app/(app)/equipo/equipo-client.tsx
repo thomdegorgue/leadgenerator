@@ -253,8 +253,8 @@ export function EquipoActions({
     setDistributing(false);
     setMessage(
       result.ok
-        ? `✅ ${result.assigned} leads repartidos entre ${result.sellers} vendedores.`
-        : `⚠️ ${result.error}`
+        ? `${result.assigned} leads repartidos entre ${result.sellers} vendedores.`
+        : result.error
     );
     router.refresh();
   }

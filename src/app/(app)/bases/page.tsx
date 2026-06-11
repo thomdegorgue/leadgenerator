@@ -133,7 +133,7 @@ export default async function BasesPage() {
                     <p className="text-xs text-muted">
                       {search.sources.join(", ")}
                       {search.products?.name && (
-                        <span className="text-accent"> · 🎯 {search.products.name}</span>
+                        <span className="text-accent"> · {search.products.name}</span>
                       )}
                       {" · "}
                       {timeAgo(search.created_at)}

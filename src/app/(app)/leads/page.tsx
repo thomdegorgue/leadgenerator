@@ -140,13 +140,10 @@ export default async function LeadsPage({
     <div className="space-y-4">
       <header className="flex flex-wrap items-end justify-between gap-3 border-b border-line pb-3">
         <div>
-          <p className="microlabel text-accent">
-            03 <span className="text-dim">/ Leads</span>
+          <h1 className="font-display text-xl font-semibold tracking-tight">Leads</h1>
+          <p className="mt-0.5 text-sm text-muted">
+            <span className="numeric text-fg">{(count ?? 0).toLocaleString("es-AR")}</span> en tu vista
           </p>
-          <h1 className="mt-1 font-display text-xl font-semibold tracking-tight">
-            <span className="numeric">{(count ?? 0).toLocaleString("es-AR")}</span>{" "}
-            <span className="text-base font-normal text-muted">en tu vista</span>
-          </h1>
         </div>
         <div className="flex items-center gap-2">
           {ctx.isAdmin && <ExportButton filters={filters} />}

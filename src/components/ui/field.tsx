@@ -4,8 +4,8 @@ import { forwardRef } from "react";
 import { cn } from "@/lib/utils";
 
 const base =
-  "w-full rounded-[4px] bg-surface2 border border-line px-3 text-sm text-fg placeholder:text-dim " +
-  "focus:outline-none focus:border-accent/70 focus:ring-1 focus:ring-accent/25 transition-colors";
+  "w-full rounded-[6px] bg-surface2 border border-line border-b-2 border-b-line-strong px-3 text-sm text-fg placeholder:text-dim " +
+  "focus:outline-none focus:border-accent/70 focus:border-b-accent/70 focus:ring-1 focus:ring-accent/20 transition-colors";
 
 export const Input = forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement>>(
   ({ className, ...props }, ref) => (

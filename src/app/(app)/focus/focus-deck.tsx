@@ -15,6 +15,7 @@ import {
   Zap,
 } from "lucide-react";
 import { ScoreRing } from "@/components/score-ring";
+import { SegmentGauge } from "@/components/ui/segment-gauge";
 import { StatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/field";
@@ -132,19 +133,20 @@ export function FocusDeck({
             {sessionDone > 0 && <span className="ml-2 text-accent">· {sessionDone} esta sesión</span>}
           </p>
         </div>
-        <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-surface2">
-          <motion.div
-            className={cn("h-full rounded-full", contacts >= dailyGoal ? "bg-success" : "bg-accent")}
-            animate={{ width: `${goalProgress}%` }}
-            transition={{ type: "spring", damping: 20 }}
-          />
-        </div>
+        <SegmentGauge
+          ratio={goalProgress / 100}
+          segments={12}
+          tone={contacts >= dailyGoal ? "success" : "accent"}
+          className="mt-2"
+        />
       </div>
 
       {!lead ? (
         <div className="flex flex-1 flex-col items-center justify-center gap-3 text-center">
-          <span className="text-4xl">🏁</span>
-          <p className="font-semibold">Cola vacía. Crack.</p>
+          <span className="inset flex size-14 items-center justify-center text-success">
+            <Check className="size-7" />
+          </span>
+          <p className="font-display font-semibold">Cola completada</p>
           <p className="max-w-xs text-sm text-muted">
             No te queda nada priorizado. Pedile leads a tu manager o revisá el{" "}
             <Link href="/pipeline" className="text-accent hover:underline">
@@ -162,21 +164,21 @@ export function FocusDeck({
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, x: 240, rotate: 6, transition: { duration: 0.22 } }}
               transition={{ type: "spring", damping: 26, stiffness: 320 }}
-              className="hud-ticks flex h-full flex-col border border-line bg-surface p-5"
+              className="tile flex h-full flex-col rounded-[14px] border-b-[3px] p-5"
             >
               {/* Prioridad */}
               <div className="mb-3 flex items-center gap-2">
                 {lead.status === "respondio" ? (
-                  <span className="border border-violet-400/40 bg-violet-400/10 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-violet-300">
-                    💬 Respondió — contestale
+                  <span className="flex items-center gap-1.5 rounded-[4px] border border-violet-400/40 bg-violet-400/10 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-violet-300">
+                    <MessageCircle className="size-3" /> Respondió — contestale
                   </span>
                 ) : lead.overdue ? (
-                  <span className="border border-danger/40 bg-danger/10 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-danger">
-                    ⏰ Seguimiento vencido
+                  <span className="flex items-center gap-1.5 rounded-[4px] border border-danger/40 bg-danger/10 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-danger">
+                    <CalendarClock className="size-3" /> Seguimiento vencido
                   </span>
                 ) : (
-                  <span className="border border-accent/40 bg-accent/10 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-accent">
-                    ✦ Nuevo para vos
+                  <span className="flex items-center gap-1.5 rounded-[4px] border border-accent/40 bg-accent/10 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-accent">
+                    <Zap className="size-3" /> Nuevo para vos
                   </span>
                 )}
                 <span className="flex-1" />
@@ -216,17 +218,17 @@ export function FocusDeck({
                         <button
                           onClick={() => setUseSpeech(true)}
                           className={cn(
-                            "rounded-full px-2.5 py-1 text-[11px] font-medium",
+                            "flex items-center gap-1 rounded-[4px] px-2.5 py-1 text-[11px] font-medium",
                             useSpeech ? "bg-violet-400/20 text-violet-300" : "bg-surface2 text-muted"
                           )}
                         >
-                          ✨ Speech IA
+                          <Sparkles className="size-3" /> Speech IA
                         </button>
                       )}
                       <button
                         onClick={() => setUseSpeech(false)}
                         className={cn(
-                          "rounded-full px-2.5 py-1 text-[11px] font-medium",
+                          "rounded-[4px] px-2.5 py-1 text-[11px] font-medium",
                           !useSpeech || !lead.speech ? "bg-accent/20 text-accent" : "bg-surface2 text-muted"
                         )}
                       >

@@ -76,7 +76,7 @@ export function LeadsTable({
   function runBulk(action: BulkAction) {
     startTransition(async () => {
       const result = await bulkLeads([...selected], action);
-      setMessage(result.ok ? `✓ ${result.affected} leads actualizados` : `⚠ ${result.error}`);
+      setMessage(result.ok ? `${result.affected} leads actualizados.` : result.error);
       setSelected(new Set());
       router.refresh();
       setTimeout(() => setMessage(null), 4000);
@@ -213,7 +213,7 @@ export function LeadsTable({
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 24 }}
-            className="glass hud-ticks fixed inset-x-3 bottom-24 z-40 flex flex-wrap items-center gap-2 rounded-[6px] p-3 md:bottom-6 md:left-52 md:right-6"
+            className="glass fixed inset-x-3 bottom-24 z-40 flex flex-wrap items-center gap-2 rounded-[10px] border-b-2 border-b-line-strong p-3 md:bottom-6 md:left-52 md:right-6"
           >
             <span className="numeric rounded-full bg-accent/15 px-2.5 py-1 text-xs font-semibold text-accent">
               {selected.size}
