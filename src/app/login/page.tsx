@@ -20,8 +20,7 @@ export default function LoginPage() {
         </div>
         <LoginForm />
         <div className="mt-6 flex items-center justify-center gap-2">
-          <span className="pulse-dot size-1.5 rounded-full bg-success" />
-          <p className="microlabel">El que todo lo ve · acceso restringido</p>
+          <p className="microlabel">acceso restringido</p>
         </div>
       </div>
     </main>
