@@ -1,8 +1,12 @@
 import { redirect } from "next/navigation";
 import { Radar, FileSpreadsheet } from "lucide-react";
 import { getCtx } from "@/lib/auth";
-import { apifyEnabled } from "@/lib/flags";
+import { aiEnabled, apifyEnabled } from "@/lib/flags";
 import { syncRunningApifyRuns } from "@/lib/apify-import";
+import { IntelPanel } from "./intel-panel";
+
+// Lotes de enriquecimiento/IA pueden tardar (webs lentas, Apify sync)
+export const maxDuration = 300;
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty";
@@ -37,11 +41,25 @@ export default async function BasesPage() {
   // red de seguridad del webhook en producción).
   if (apifyEnabled()) await syncRunningApifyRuns(ctx.org.id);
 
-  const { data } = await ctx.supabase
-    .from("searches")
-    .select("*, search_runs(*)")
-    .order("created_at", { ascending: false })
-    .limit(20);
+  const countLeads = (build: (q: ReturnType<typeof baseQuery>) => ReturnType<typeof baseQuery>) =>
+    build(baseQuery());
+  const baseQuery = () =>
+    ctx.supabase.from("leads").select("id", { count: "exact", head: true });
+
+  const [{ data }, webPending, igPending, aiPending] = await Promise.all([
+    ctx.supabase
+      .from("searches")
+      .select("*, search_runs(*)")
+      .order("created_at", { ascending: false })
+      .limit(20),
+    countLeads((q) => q.is("enriched_at", null)),
+    apifyEnabled()
+      ? countLeads((q) => q.not("instagram", "is", null).is("ig_enriched_at", null))
+      : Promise.resolve({ count: 0 }),
+    aiEnabled()
+      ? countLeads((q) => q.not("enriched_at", "is", null).is("ai_scored_at", null))
+      : Promise.resolve({ count: 0 }),
+  ]);
 
   const searches = (data ?? []) as (Search & { search_runs: SearchRun[] })[];
   const hasRunning = searches.some((s) =>
@@ -74,6 +92,17 @@ export default async function BasesPage() {
           </Card>
         )}
         <CsvImport />
+      </section>
+
+      <section>
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider">Inteligencia</h2>
+        <IntelPanel
+          webPending={webPending.count ?? 0}
+          igPending={igPending.count ?? 0}
+          aiPending={aiPending.count ?? 0}
+          igAvailable={apifyEnabled()}
+          aiAvailable={aiEnabled()}
+        />
       </section>
 
       <section>

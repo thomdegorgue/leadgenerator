@@ -680,4 +680,11 @@ end $$;
 -- Las columnas/cambios posteriores al create table original van acá, en orden,
 -- siempre con "if not exists" / patrón idempotente. Ejemplo:
 --   alter table public.leads add column if not exists tags text[] not null default '{}';
--- (vacío por ahora)
+
+-- [2026-06] Fase 2: tracking de enriquecimiento e IA por lead
+alter table public.leads add column if not exists enriched_at timestamptz;
+alter table public.leads add column if not exists ig_enriched_at timestamptz;
+alter table public.leads add column if not exists ai_scored_at timestamptz;
+
+create index if not exists leads_pending_enrich_idx
+  on public.leads (org_id, created_at) where enriched_at is null;

@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
 import { Input, Label, Select } from "@/components/ui/field";
-import { createTeam, distributeLeads, inviteUser } from "@/server/team";
+import { createTeam, distributeLeads, inviteUser, type DistributionMode } from "@/server/team";
 import type { Role, Team } from "@/lib/types";
 
 export function InviteButton({ teams }: { teams: Team[] }) {
@@ -133,13 +133,14 @@ export function EquipoActions({
   const router = useRouter();
   const [distributing, setDistributing] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [mode, setMode] = useState<DistributionMode>("round_robin");
   const [teamName, setTeamName] = useState("");
   const [creatingTeam, setCreatingTeam] = useState(false);
 
   async function onDistribute() {
     setDistributing(true);
     setMessage(null);
-    const result = await distributeLeads();
+    const result = await distributeLeads(mode);
     setDistributing(false);
     setMessage(
       result.ok
@@ -169,17 +170,28 @@ export function EquipoActions({
           </div>
           <p className="mt-1 text-sm text-muted">
             <span className="numeric text-fg">{unassignedCount}</span> leads nuevos sin asignar.
-            Round-robin entre los vendedores.
           </p>
         </div>
-        <Button
-          onClick={onDistribute}
-          loading={distributing}
-          disabled={unassignedCount === 0}
-          variant={unassignedCount > 0 ? "primary" : "secondary"}
-        >
-          Repartir ahora
-        </Button>
+        <div className="flex gap-2">
+          <Select
+            value={mode}
+            onChange={(e) => setMode(e.target.value as DistributionMode)}
+            aria-label="Modo de distribución"
+            className="flex-1"
+          >
+            <option value="round_robin">Parejo (round-robin)</option>
+            <option value="por_carga">Equilibrar carga</option>
+            <option value="por_score">Mejores leads primero</option>
+          </Select>
+          <Button
+            onClick={onDistribute}
+            loading={distributing}
+            disabled={unassignedCount === 0}
+            variant={unassignedCount > 0 ? "primary" : "secondary"}
+          >
+            Repartir
+          </Button>
+        </div>
         {message && <p className="text-xs text-muted">{message}</p>}
       </Card>
 

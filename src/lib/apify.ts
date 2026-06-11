@@ -72,6 +72,44 @@ export async function fetchDatasetItems(datasetId: string): Promise<Record<strin
   return (await res.json()) as Record<string, unknown>[];
 }
 
+export interface IgProfile {
+  username: string;
+  followers: number | null;
+  posts: number | null;
+  biography: string | null;
+  category: string | null;
+  externalUrl: string | null;
+}
+
+/**
+ * Scrapea perfiles públicos de Instagram (corrida sincrónica, lotes chicos).
+ * Devuelve solo los perfiles encontrados; los handles inexistentes no aparecen.
+ */
+export async function fetchInstagramProfiles(usernames: string[]): Promise<IgProfile[]> {
+  const res = await fetch(
+    `https://api.apify.com/v2/acts/apify~instagram-profile-scraper/run-sync-get-dataset-items?token=${process.env.APIFY_TOKEN}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ usernames }),
+      signal: AbortSignal.timeout(240_000),
+    }
+  );
+  if (!res.ok) throw new Error(`Apify IG ${res.status}: ${await res.text()}`);
+
+  const items = (await res.json()) as Record<string, unknown>[];
+  return items
+    .filter((i) => typeof i.username === "string")
+    .map((i) => ({
+      username: (i.username as string).toLowerCase(),
+      followers: typeof i.followersCount === "number" ? i.followersCount : null,
+      posts: typeof i.postsCount === "number" ? i.postsCount : null,
+      biography: typeof i.biography === "string" ? i.biography : null,
+      category: typeof i.businessCategoryName === "string" ? i.businessCategoryName : null,
+      externalUrl: typeof i.externalUrl === "string" ? i.externalUrl : null,
+    }));
+}
+
 /** Mapea un item del actor de Google Maps al formato canónico de lead. */
 export function mapGmapsItem(item: Record<string, unknown>): CanonicalLeadRow {
   const str = (k: string) => (typeof item[k] === "string" && (item[k] as string).trim()) || null;

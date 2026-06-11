@@ -76,7 +76,7 @@ INNGEST_SIGNING_KEY=
 
 ## Roadmap (resumen — detalle en PROPUESTA.md)
 
-1. **Fase 1**: auth+roles+RLS, generador de bases (GMaps/CSV), dedup, pipeline, WhatsApp con plantillas, historial, asignación, design system. *Funciona 100% sin IA.*
-2. **Fase 2**: enriquecimiento, score multi-producto IA, speech personalizado, distribución automática.
+1. ✅ **Fase 1**: auth+roles+RLS, generador de bases (GMaps/CSV), dedup, pipeline, WhatsApp con plantillas, historial, asignación, design system. *Funciona 100% sin IA.*
+2. ✅ **Fase 2**: enriquecimiento web (heurístico, `lib/enrich-web.ts`) + Instagram (Apify sync), score multi-producto IA (Haiku, `aiScoreBatch`), análisis comercial + speech (Sonnet, cacheado en `ai_outputs`), distribución configurable (round-robin / por carga / por score). Panel "Inteligencia" en /bases con runners por lotes; tracking por columnas `leads.enriched_at` / `ig_enriched_at` / `ai_scored_at`.
 3. **Fase 3**: campañas, Modo Focus (card-stack mobile), reciclaje, dashboard ejecutivo, PWA+push.
 4. **Fase 4** (opcional): WhatsApp Business API, multi-tenant comercial.

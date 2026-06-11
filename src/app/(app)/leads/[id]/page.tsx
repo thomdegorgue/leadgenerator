@@ -21,9 +21,15 @@ import { ScoreRing } from "@/components/score-ring";
 import { REASON_LABELS } from "@/lib/status";
 import { timeAgo } from "@/lib/utils";
 import type { Activity, Lead, LeadScore, MessageTemplate } from "@/lib/types";
+import { aiEnabled } from "@/lib/flags";
+import type { AiAnalysis } from "@/lib/ai";
 import { WhatsAppPanel } from "./whatsapp-panel";
 import { LeadControls } from "./lead-controls";
 import { NoteForm } from "./note-form";
+import { AiPanel } from "./ai-panel";
+
+// El análisis IA (Sonnet) puede tardar más que el default
+export const maxDuration = 120;
 
 export const dynamic = "force-dynamic";
 
@@ -73,7 +79,7 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
     .maybeSingle();
   if (!lead) notFound();
 
-  const [{ data: scores }, { data: activities }, { data: templates }, members] = await Promise.all([
+  const [{ data: scores }, { data: activities }, { data: templates }, members, { data: aiOutput }] = await Promise.all([
     ctx.supabase
       .from("lead_scores")
       .select("*, products(name)")
@@ -104,9 +110,28 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
             }))
           )
       : Promise.resolve([]),
+    aiEnabled()
+      ? ctx.supabase
+          .from("ai_outputs")
+          .select("content")
+          .eq("lead_id", id)
+          .eq("kind", "analisis")
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle()
+      : Promise.resolve({ data: null }),
   ]);
 
   const typedLead = lead as Lead & { assignee: { full_name: string | null } | null };
+
+  let analysis: AiAnalysis | null = null;
+  if (aiOutput?.content) {
+    try {
+      analysis = JSON.parse(aiOutput.content) as AiAnalysis;
+    } catch {
+      analysis = null;
+    }
+  }
 
   return (
     <div className="space-y-5">
@@ -156,6 +181,13 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
 
       <div className="grid gap-5 lg:grid-cols-3">
         <div className="space-y-5 lg:col-span-2">
+          {aiEnabled() && (
+            <AiPanel
+              leadId={typedLead.id}
+              phoneE164={typedLead.phone_e164}
+              initialAnalysis={analysis}
+            />
+          )}
           <WhatsAppPanel
             lead={{
               id: typedLead.id,

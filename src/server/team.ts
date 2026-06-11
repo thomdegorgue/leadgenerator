@@ -82,16 +82,23 @@ export async function updateMember(
   return { ok: true };
 }
 
-/** Distribución automática: reparte los leads sin asignar entre los vendedores, round-robin. */
-export async function distributeLeads(): Promise<
-  { ok: true; assigned: number; sellers: number } | { ok: false; error: string }
-> {
+export type DistributionMode = "round_robin" | "por_carga" | "por_score";
+
+/**
+ * Distribución automática de leads sin asignar entre los vendedores.
+ * - round_robin: parejo, en orden de llegada
+ * - por_carga: cada lead va al vendedor con menos leads activos
+ * - por_score: los mejores leads (score máximo) se reparten primero, parejo
+ */
+export async function distributeLeads(
+  mode: DistributionMode = "round_robin"
+): Promise<{ ok: true; assigned: number; sellers: number } | { ok: false; error: string }> {
   const ctx = await getCtx();
   if (!ctx.isAdmin) return { ok: false, error: "Solo managers y owners distribuyen leads." };
 
   const admin = createAdminClient();
 
-  const [{ data: sellers }, { data: leads }] = await Promise.all([
+  const [{ data: sellers }, { data: leadsRaw }] = await Promise.all([
     admin
       .from("memberships")
       .select("user_id")
@@ -99,7 +106,7 @@ export async function distributeLeads(): Promise<
       .eq("role", "vendedor"),
     admin
       .from("leads")
-      .select("id")
+      .select("id, lead_scores(score)")
       .eq("org_id", ctx.org.id)
       .is("assigned_to", null)
       .in("status", ["nuevo"])
@@ -108,14 +115,44 @@ export async function distributeLeads(): Promise<
   ]);
 
   if (!sellers?.length) return { ok: false, error: "No hay vendedores en el equipo todavía." };
-  if (!leads?.length) return { ok: true, assigned: 0, sellers: sellers.length };
+
+  let leads = (leadsRaw ?? []).map((l) => ({
+    id: l.id as string,
+    maxScore: Math.max(0, ...((l.lead_scores as { score: number }[] | null) ?? []).map((s) => s.score)),
+  }));
+  if (!leads.length) return { ok: true, assigned: 0, sellers: sellers.length };
+
+  if (mode === "por_score") {
+    leads = [...leads].sort((a, b) => b.maxScore - a.maxScore);
+  }
 
   const now = new Date().toISOString();
   const buckets = new Map<string, string[]>();
-  leads.forEach((lead, i) => {
-    const seller = sellers[i % sellers.length].user_id;
-    buckets.set(seller, [...(buckets.get(seller) ?? []), lead.id]);
-  });
+
+  if (mode === "por_carga") {
+    // Carga actual de cada vendedor (leads activos)
+    const loads = new Map<string, number>();
+    await Promise.all(
+      sellers.map(async (s) => {
+        const { count } = await admin
+          .from("leads")
+          .select("id", { count: "exact", head: true })
+          .eq("assigned_to", s.user_id)
+          .not("status", "in", "(cliente,descartado)");
+        loads.set(s.user_id, count ?? 0);
+      })
+    );
+    for (const lead of leads) {
+      const seller = [...loads.entries()].sort((a, b) => a[1] - b[1])[0][0];
+      buckets.set(seller, [...(buckets.get(seller) ?? []), lead.id]);
+      loads.set(seller, (loads.get(seller) ?? 0) + 1);
+    }
+  } else {
+    leads.forEach((lead, i) => {
+      const seller = sellers[i % sellers.length].user_id;
+      buckets.set(seller, [...(buckets.get(seller) ?? []), lead.id]);
+    });
+  }
 
   for (const [sellerId, leadIds] of buckets) {
     const { error } = await admin
